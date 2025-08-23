@@ -1,0 +1,15 @@
+TOPIC
+    about_PSRest
+
+SHORT DESCRIPTION
+    PowerShell module
+
+LONG DESCRIPTION
+    The module provides the following commands:
+
+        Set-RestEnvironment
+        Get-RestVariable
+        Resolve-RestVariable
+
+SEE ALSO
+    PSRest https://github.com/nightroman/PSRest
