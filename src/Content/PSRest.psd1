@@ -22,7 +22,7 @@
 
 	PrivateData = @{
 		PSData = @{
-			Tags = 'PSRest'
+			Tags = 'VSCode', 'REST', 'Client', 'Environment', 'GraphQL', 'HTTP', 'Request'
 			ProjectUri = 'https://github.com/nightroman/PSRest'
 			LicenseUri = 'https://github.com/nightroman/PSRest/blob/main/LICENSE'
 			ReleaseNotes = 'https://github.com/nightroman/PSRest/blob/main/Release-Notes.md'

@@ -18,14 +18,8 @@ $Description = 'PowerShell module'
 $ProjectUrl = "https://github.com/nightroman/$ModuleName"
 $Copyright = 'Copyright (c) 2025 Roman Kuzmin'
 
-function __clean {
-	Push-Location $PSScriptRoot
-	remove README.html, *.nupkg, z, src\*\bin, src\*\obj
-	Pop-Location
-}
-
 task clean {
-	__clean
+	remove README.html, *.nupkg, z, src\*\bin, src\*\obj
 }
 
 task build meta, {
@@ -122,20 +116,11 @@ Sprache.dll
 task pushPSGallery package, {
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
-	__clean
-}
+}, clean
 
 task test {
 	$ErrorView = 'NormalView'
 	Invoke-Build ** tests
 }
 
-task core {
-	exec { pwsh -NoProfile -Command Invoke-Build test }
-}
-
-task tests core
-
-task all build, help, tests, clean
-
-task . build, clean
+task . build, help, clean

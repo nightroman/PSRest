@@ -3,6 +3,8 @@ Set-StrictMode -Version 3
 Import-Module PSRest
 
 task processEnv {
+	Set-RestEnvironment
+
 	$r = Get-RestVariable missing -Type ProcessEnv
 	equals $r $null
 
@@ -12,6 +14,9 @@ task processEnv {
 }
 
 task dotEnv {
+	$env:key1 = $null
+	Set-RestEnvironment
+
 	$r = Get-RestVariable missing -Type DotEnv
 	equals $r $null
 
@@ -20,9 +25,14 @@ task dotEnv {
 
 	$r = Get-RestVariable key2 -Type DotEnv
 	equals $r DotEnv2
+
+	#! cover .env is not loaded into process
+	equals $env:key1 $null
 }
 
 task env {
+	Set-RestEnvironment
+
 	$r = Get-RestVariable missing
 	equals $r $null
 

@@ -77,7 +77,7 @@ public partial class RestEnvironment
             var path = Path.Join(_workDir, Const.DotEnvFile);
             try
             {
-                _dataDotEnv = Env.Load(path).ToDotEnvDictionary();
+                _dataDotEnv = Env.NoEnvVars().Load(path).ToDotEnvDictionary();
             }
             catch (Exception ex)
             {

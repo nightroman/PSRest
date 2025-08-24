@@ -12,6 +12,8 @@ public abstract class BaseEnvironmentCmdlet : PSCmdlet
     public RestEnvironment Environment
     {
         set { _Environment = value; }
-        get => _Environment ??= (RestEnvironment)GetVariableValue(Const.VarRestEnvironment) ?? new(SessionState.Path.CurrentFileSystemLocation.ProviderPath, null);
+        get => _Environment ??=
+            (RestEnvironment)GetVariableValue(Const.VarRestEnvironment) ??
+            throw new InvalidOperationException("Invoke Set-RestEnvironment before this command.");
     }
 }
