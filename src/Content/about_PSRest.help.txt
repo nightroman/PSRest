@@ -2,7 +2,7 @@ TOPIC
     about_PSRest
 
 SHORT DESCRIPTION
-    PowerShell module
+    VSCode REST Client features in PowerShell.
 
 LONG DESCRIPTION
     The module provides the following commands:

@@ -1,6 +1,6 @@
 # PSRest
 
-> Some VSCode REST Client features in PowerShell
+> VSCode REST Client features in PowerShell.
 
 ## Install
 

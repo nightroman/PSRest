@@ -1,7 +1,7 @@
 @{
 	Author = 'Roman Kuzmin'
 	ModuleVersion = '0.0.0'
-	Description = 'PowerShell module'
+	Description = 'VSCode REST Client features in PowerShell.'
 	CompanyName = 'https://github.com/nightroman'
 	Copyright = 'Copyright (c) 2025 Roman Kuzmin'
 

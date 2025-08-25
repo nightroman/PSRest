@@ -6,16 +6,48 @@
 Set-StrictMode -Version 3
 Import-Module PSRest
 
+$Environment = @'
+		Specifies the environment, usually different from the current set by
+		Set-RestEnvironment. In most cases this parameter is not used directly.
+'@
+
 ### Set-RestEnvironment
 @{
 	command = 'Set-RestEnvironment'
 	synopsis = 'Sets the current environment.'
 	description = @'
-	...
+	Sets the current environment as $RestEnvironment in the current scope.
+	This variable is used by other commands as the parameter Environment
+	default.
+
+	If Set-RestEnvironment is not invoked or its $RestEnvironment is not in
+	the current or parent scope, other PSRest commands may fail. They might
+	need their own Set-RestEnvironment invoked or $RestEnvironment exposed.
 '@
 	parameters = @{
-		Name = '...'
-		Path = '...'
+		Name = @'
+		Specifies the environment name, one of defined in ".vscode/settings.json".
+
+		Example: '$shared' (default), 'local', 'production':
+
+			{
+			  "rest-client.environmentVariables": {
+			    "$shared": {
+			      ...
+			    },
+			    "local": {
+			      ...
+			    },
+			    "production": {
+			      ...
+			    }
+			  }
+			}
+'@
+		Path = @'
+		Specifies the directory used for files discovery.
+		Default: The current location.
+'@
 	}
 }
 
@@ -24,12 +56,19 @@ Import-Module PSRest
 	command = 'Get-RestVariable'
 	synopsis = 'Gets the specified variable.'
 	description = @'
-	...
+	Gets the specified variable value or null if the variable is not found.
 '@
 	parameters = @{
-		Name = '...'
-		Type = '...'
-		Environment = '...'
+		Name = 'The variable name.'
+		Type = @'
+		The variable type.
+		Default: Any
+
+		With Any, Name is the full name with a prefix like $dotenv,
+		$processEnv, etc. With other types, Name is just the name.
+
+'@
+		Environment = $Environment
 	}
 }
 
@@ -38,9 +77,14 @@ Import-Module PSRest
 	command = 'Resolve-RestVariable'
 	synopsis = 'Expands variables in input strings.'
 	description = @'
+	Replaces each variable embedded in the specified string with its value,
+	then returns the result string.
 '@
 	parameters = @{
-		Value = '...'
-		Environment = '...'
+		Value = @'
+		One or more strings to expand, specified as parameter or pipeline
+		input. Nulls and empty strings are allowed and passed through.
+'@
+		Environment = $Environment
 	}
 }

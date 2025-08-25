@@ -14,7 +14,7 @@ Set-StrictMode -Version 3
 $ModuleName = 'PSRest'
 $ModuleRoot = "$env:ProgramFiles\PowerShell\Modules\$ModuleName"
 
-$Description = 'PowerShell module'
+$Description = 'VSCode REST Client features in PowerShell.'
 $ProjectUrl = "https://github.com/nightroman/$ModuleName"
 $Copyright = 'Copyright (c) 2025 Roman Kuzmin'
 
@@ -23,14 +23,11 @@ task clean {
 }
 
 task build meta, {
-	Set-Location src\$ModuleName
-	exec { dotnet build -c $Configuration -f $TargetFramework }
+	exec { dotnet build src\$ModuleName -c $Configuration -f $TargetFramework }
 }
 
 task publish {
-	Set-Location src
-
-	exec { dotnet publish $ModuleName\$ModuleName.csproj -c $Configuration -f $TargetFramework -o $ModuleRoot --no-build }
+	exec { dotnet publish src\$ModuleName -c $Configuration -f $TargetFramework -o $ModuleRoot --no-build }
 	remove $ModuleRoot\$ModuleName.deps.json, $ModuleRoot\System.Management.Automation.dll
 }
 
@@ -119,7 +116,6 @@ task pushPSGallery package, {
 }, clean
 
 task test {
-	$ErrorView = 'NormalView'
 	Invoke-Build ** tests
 }
 
