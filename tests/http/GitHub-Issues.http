@@ -1,0 +1,23 @@
+# Invoke-RestHttp
+
+POST https://api.github.com/graphql
+Content-Type: application/json
+X-REQUEST-TYPE: GraphQL
+Authorization: Bearer {{$processEnv GITHUB_TOKEN}}
+User-Agent: {{$dotenv user}}
+
+query {
+  user(login: "{{$dotenv user}}") {
+    issues(
+      first: 10
+      states: [OPEN]
+      orderBy: { direction: DESC, field: CREATED_AT }
+    ) {
+      totalCount
+      nodes {
+        title
+        url
+      }
+    }
+  }
+}

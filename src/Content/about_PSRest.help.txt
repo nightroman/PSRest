@@ -8,6 +8,7 @@ LONG DESCRIPTION
     The module provides the following commands:
 
         Set-RestEnvironment
+        Invoke-RestHttp
         Get-RestVariable
         Resolve-RestVariable
 

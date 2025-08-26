@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSRest", "src\PSRest\PSRest.csproj", "{83638199-B90E-FD4F-2E6C-FE6F75A1027E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSRest.Test", "src\PSRest.Test\PSRest.Test.csproj", "{51CD96E1-FE69-0E17-989A-CD06A9869DA5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.build.ps1 = .build.ps1
+		src\Content\about_PSRest.help.txt = src\Content\about_PSRest.help.txt
+		Help.ps1 = Help.ps1
+		src\Content\PSRest.psd1 = src\Content\PSRest.psd1
+		README.md = README.md
+		Release-Notes.md = Release-Notes.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83638199-B90E-FD4F-2E6C-FE6F75A1027E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83638199-B90E-FD4F-2E6C-FE6F75A1027E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83638199-B90E-FD4F-2E6C-FE6F75A1027E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83638199-B90E-FD4F-2E6C-FE6F75A1027E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51CD96E1-FE69-0E17-989A-CD06A9869DA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51CD96E1-FE69-0E17-989A-CD06A9869DA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51CD96E1-FE69-0E17-989A-CD06A9869DA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51CD96E1-FE69-0E17-989A-CD06A9869DA5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

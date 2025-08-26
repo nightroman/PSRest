@@ -27,6 +27,7 @@ $Environment = @'
 	parameters = @{
 		Name = @'
 		Specifies the environment name, one of defined in ".vscode/settings.json".
+		Default: $env:REST_ENV
 
 		Example: '$shared' (default), 'local', 'production':
 
@@ -48,6 +49,22 @@ $Environment = @'
 		Specifies the directory used for files discovery.
 		Default: The current location.
 '@
+	}
+}
+
+### Invoke-RestHttp
+@{
+	command = 'Invoke-RestHttp'
+	synopsis = 'Invokes VSCode REST Client files (.http, .rest).'
+	description = @'
+	Parses and invokes an HTTP request from VSCode REST Client file (.http,
+	.rest) or provided as Text and returns the response body string, either
+	as formatted JSON or as is.
+'@
+	parameters = @{
+		Path = 'The HTTP file.'
+		Text = 'The HTTP text.'
+		Environment = $Environment
 	}
 }
 

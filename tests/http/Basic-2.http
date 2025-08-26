@@ -1,0 +1,10 @@
+﻿# Invoke-RestHttp
+//@param1 = 42 // file variables not yet supported
+
+POST http://127.0.0.1:55000/show?param1=42
+content-type: application/json
+
+{
+  "version": "{{version}}",
+  "user": "{{$dotenv user}}"
+}

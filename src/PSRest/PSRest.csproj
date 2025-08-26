@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
+    <PackageReference Include="Sprache" Version="2.3.1" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="pwsh -nop -c Invoke-Build publish -Configuration $(Configuration) -TargetFramework $(TargetFramework)" />

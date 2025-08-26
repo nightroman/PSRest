@@ -2,6 +2,15 @@
 Set-StrictMode -Version 3
 Import-Module PSRest
 
+Enter-Build {
+	$REST_ENV =  $env:REST_ENV
+	$env:REST_ENV = $null
+}
+
+Exit-Build {
+	$env:REST_ENV = $REST_ENV
+}
+
 task processEnv {
 	Set-RestEnvironment
 

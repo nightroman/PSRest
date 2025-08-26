@@ -17,7 +17,7 @@ public partial class RestEnvironment
 
     public RestEnvironment(string workDir, string? envName)
     {
-        _envName = envName ?? Const.EnvNameShared;
+        _envName = envName ?? Environment.GetEnvironmentVariable(Const.EnvVarDefault) ?? Const.EnvNameShared;
         _workDir = workDir;
     }
 
