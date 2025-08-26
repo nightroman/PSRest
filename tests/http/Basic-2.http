@@ -1,10 +1,17 @@
 ﻿# Invoke-RestHttp
-//@param1 = 42 // file variables not yet supported
 
-POST http://127.0.0.1:55000/show?param1=42
+// file variables // using later vars is fine
+@var2 = {{var1}}
+@var1 = 11
+@var1 = 42
+
+POST http://127.0.0.1:55000/show?param1={{var2}}
 content-type: application/json
+age: {{var2}}
 
 {
   "version": "{{version}}",
-  "user": "{{$dotenv user}}"
+  "user": "{{$dotenv user}}",
+  "oops": "{{missing}}",
+  "age": {{var2}}
 }

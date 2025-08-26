@@ -12,8 +12,8 @@ Install-Module PSRest
 
 ## Commands
 
-- `Set-RestEnvironment`
 - `Invoke-RestHttp`
+- `Set-RestEnvironment`
 - `Get-RestVariable`
 - `Resolve-RestVariable`
 
@@ -22,7 +22,7 @@ Install-Module PSRest
 - [x] Environments and variables `{{var}}`, `{{$shared var}}`, `{{$dotenv var}}`, `{{$processEnv var}}`
 - [ ] Parse and invoke REST Client files `.http` / `.rest` (GraphQL and HTTP requests)
     - [x] Add `Invoke-RestHttp`
-    - [ ] Support file variables
+    - [x] Support file variables
     - [ ] Support GraphQL variables
     - [ ] Other content types in addition to JSON
     - [ ] Support request body or GraphQL in files

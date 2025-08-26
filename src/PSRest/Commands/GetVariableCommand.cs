@@ -15,6 +15,6 @@ public sealed class GetVariableCommand : BaseEnvironmentCmdlet
 
     protected override void BeginProcessing()
     {
-        WriteObject(Environment.GetVariable(Name, Type));
+        WriteObject(GetCurrentEnvironment().GetVariable(Name, Type));
     }
 }

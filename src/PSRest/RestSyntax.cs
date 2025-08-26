@@ -1,21 +1,21 @@
 ﻿
 namespace PSRest;
 
-public interface IHttpSyntax;
+public interface IRestSyntax;
 
-public class HttpComment : IHttpSyntax
+public class RestComment : IRestSyntax
 {
     public required string Start { get; init; }
     public required string Text { get; init; }
 }
 
-public class HttpVariable : IHttpSyntax
+public class RestVariable : IRestSyntax
 {
     public required string Name { get; init; }
     public required string Value { get; init; }
 }
 
-public class HttpRequest : IHttpSyntax
+public class RestRequest : IRestSyntax
 {
     public required string Method { get; init; }
     public required string Url { get; init; }

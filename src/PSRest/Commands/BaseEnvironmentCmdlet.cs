@@ -12,8 +12,23 @@ public abstract class BaseEnvironmentCmdlet : PSCmdlet
     public RestEnvironment Environment
     {
         set { _Environment = value; }
-        get => _Environment ??=
+    }
+
+    /// <summary>
+    /// Gets the current environment or fails.
+    /// </summary>
+    protected RestEnvironment GetCurrentEnvironment()
+    {
+        return _Environment ??=
             (RestEnvironment)GetVariableValue(Const.VarRestEnvironment) ??
             throw new InvalidOperationException("Invoke Set-RestEnvironment before this command.");
+    }
+
+    /// <summary>
+    /// Gets the current environment or creates new with the directory.
+    /// </summary>
+    protected RestEnvironment GetOrCreateEnvironment(string dir)
+    {
+        return _Environment ?? new RestEnvironment(dir, null);
     }
 }

@@ -21,7 +21,7 @@ public partial class RestEnvironment
         _workDir = workDir;
     }
 
-    public string? GetVariable(string name, VariableType type)
+    public string? GetVariable(string name, VariableType type, Dictionary<string, string>? vars = null)
     {
         if (type == VariableType.Any)
         {
@@ -57,7 +57,7 @@ public partial class RestEnvironment
 
         return type switch
         {
-            VariableType.Env => GetEnvVariable(name),
+            VariableType.Env => GetEnvVariable(name, false, vars),
             VariableType.Shared => GetEnvVariable(name, true),
             VariableType.DotEnv => GetDotEnvVariable(name),
             VariableType.ProcessEnv => GetProcessEnvVariable(name),
@@ -77,7 +77,7 @@ public partial class RestEnvironment
             var path = Path.Join(_workDir, Const.DotEnvFile);
             try
             {
-                _dataDotEnv = Env.NoEnvVars().Load(path).ToDotEnvDictionary();
+                _dataDotEnv = Env.NoEnvVars().Load(path).ToDotEnvDictionary(CreateDictionaryOption.TakeFirst);
             }
             catch (Exception ex)
             {
@@ -142,12 +142,15 @@ public partial class RestEnvironment
         }
     }
 
-    public string? GetEnvVariable(string name, bool shared = false)
+    public string? GetEnvVariable(string name, bool shared = false, Dictionary<string, string>? vars = null)
     {
+        if (!shared && vars is { } && vars.TryGetValue(name, out var value))
+            return value;
+
         if (_dataEnvShared is null)
             InitEnv();
 
-        if (!shared && _dataEnvCurrent is { } && _dataEnvCurrent.TryGetValue(name, out var value))
+        if (!shared && _dataEnvCurrent is { } && _dataEnvCurrent.TryGetValue(name, out value))
             return ExpandVariables(value);
 
         if (_dataEnvShared!.TryGetValue(name, out value))
@@ -156,14 +159,15 @@ public partial class RestEnvironment
         return null;
     }
 
-    public string ExpandVariables(string value)
+    public string ExpandVariables(string value, Dictionary<string, string>? vars = null)
     {
         var mm = RegexVariable().Matches(value);
         for (int i = mm.Count; --i >= 0;)
         {
             var m = mm[i];
-            var var = GetVariable(m.Groups[1].Value, VariableType.Any);
-            value = value[0..m.Index] + var + value[(m.Index + m.Length)..];
+            var var = GetVariable(m.Groups[1].Value, VariableType.Any, vars);
+            if (var is { })
+                value = value[0..m.Index] + var + value[(m.Index + m.Length)..];
         }
         return value;
     }

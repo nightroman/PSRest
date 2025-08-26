@@ -115,6 +115,12 @@ task pushPSGallery package, {
 	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
 }, clean
 
+task unit {
+	Set-Location src\PSRest.Test
+	exec { dotnet run -c Release }
+	remove bin, obj
+}
+
 task test {
 	Invoke-Build ** tests
 }

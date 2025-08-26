@@ -7,8 +7,8 @@ SHORT DESCRIPTION
 LONG DESCRIPTION
     The module provides the following commands:
 
-        Set-RestEnvironment
         Invoke-RestHttp
+        Set-RestEnvironment
         Get-RestVariable
         Resolve-RestVariable
 

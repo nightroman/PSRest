@@ -80,7 +80,7 @@ task resolve_shared {
 	Set-RestEnvironment
 
 	$1, $2 = '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv key1}} // {{$processEnv test}}>>' | Resolve-RestVariable
-	equals $1 '<<v1 // >>'
+	equals $1 '<<v1 // {{$shared token}}>>'
 	equals $2 '<<DotEnv1 // 42>>'
 }
 
@@ -89,6 +89,6 @@ task resolve_local {
 	Set-RestEnvironment local
 
 	$1, $2 = Resolve-RestVariable '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv key1}} // {{$processEnv test}}>>'
-	equals $1 '<<v2 // >>'
+	equals $1 '<<v2 // {{$shared token}}>>'
 	equals $2 '<<DotEnv1 // 42>>'
 }

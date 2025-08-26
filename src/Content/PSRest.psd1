@@ -15,8 +15,8 @@
 	VariablesToExport = @()
 	FunctionsToExport = @()
 	CmdletsToExport = @(
-		'Set-RestEnvironment'
 		'Invoke-RestHttp'
+		'Set-RestEnvironment'
 		'Get-RestVariable'
 		'Resolve-RestVariable'
 	)

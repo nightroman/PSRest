@@ -3,26 +3,26 @@ using Sprache;
 
 namespace PSRest;
 
-public static class HttpParser
+public static class RestParser
 {
-    public static readonly Parser<IHttpSyntax> WhiteSpaceParser =
+    public static readonly Parser<IRestSyntax> WhiteSpaceParser =
         from _ in Parse.WhiteSpace.AtLeastOnce()
-        select (IHttpSyntax)null!;
+        select (IRestSyntax)null!;
 
-    public static readonly Parser<HttpComment> CommentParser =
+    public static readonly Parser<RestComment> CommentParser =
         from leading in Parse.WhiteSpace.Many()
         from start in Parse.String("#").Or(Parse.String("//")).Text()
         from text in Parse.CharExcept("\r\n").Many().Text()
         from _ in Parse.LineTerminator
-        select new HttpComment { Start = start, Text = text };
+        select new RestComment { Start = start, Text = text };
 
-    public static readonly Parser<HttpVariable> VariableParser =
+    public static readonly Parser<RestVariable> VariableParser =
         from at in Parse.Char('@')
         from name in Parse.LetterOrDigit.AtLeastOnce().Text().Token()
         from eq in Parse.Char('=').Token()
         from value in Parse.CharExcept("\r\n").Many().Text()
         from _ in Parse.LineTerminator
-        select new HttpVariable { Name = name, Value = value };
+        select new RestVariable { Name = name, Value = value };
 
     public static readonly Parser<string> MethodParser =
         Parse.String("GET")
@@ -63,11 +63,11 @@ public static class HttpParser
         from lines in BodyLineParser.Many()
         select string.Join('\n', lines);
 
-    public static readonly Parser<HttpRequest> RequestParser =
+    public static readonly Parser<RestRequest> RequestParser =
         from reqLine in RequestLineParser
         from headers in HeaderParser.Many()
         from body in BodyParser.Optional()
-        select new HttpRequest
+        select new RestRequest
         {
             Method = reqLine.Item1,
             Url = reqLine.Item2,
@@ -75,13 +75,13 @@ public static class HttpParser
             Body = body.GetOrDefault()
         };
 
-    public static readonly Parser<IHttpSyntax> AnyParser =
+    public static readonly Parser<IRestSyntax> AnyParser =
         WhiteSpaceParser
         .Or(RequestParser)
         .Or(CommentParser)
         .Or(VariableParser)
         ;
 
-    public static readonly Parser<IEnumerable<IHttpSyntax>> Parser =
+    public static readonly Parser<IEnumerable<IRestSyntax>> Parser =
         AnyParser.Many();
 }

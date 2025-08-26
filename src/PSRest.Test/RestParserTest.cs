@@ -1,9 +1,10 @@
-﻿using Sprache;
+﻿
+using Sprache;
 using Xunit;
 
 namespace PSRest.Test;
 
-public class HttpParserTest
+public class RestParserTest
 {
     [Theory]
     [InlineData("### bar", "## bar")]
@@ -11,7 +12,7 @@ public class HttpParserTest
     [InlineData("# bar\r\n", " bar")]
     public void Comment(string input, string expected)
     {
-        var res = HttpParser.CommentParser.TryParse(input);
+        var res = RestParser.CommentParser.TryParse(input);
         Assert.True(res.WasSuccessful);
         Assert.Equal(expected, res.Value.Text);
     }
@@ -60,10 +61,10 @@ public class HttpParserTest
     [InlineData(Http2, 4, 1)]
     public void Http(string input, int nAll, int nRequest)
     {
-        var res = HttpParser.Parser.TryParse(input);
+        var res = RestParser.Parser.TryParse(input);
         Assert.True(res.WasSuccessful);
         Assert.Equal(nAll, res.Value.Count());
-        Assert.Equal(nRequest, res.Value.Count(x => x is HttpRequest));
+        Assert.Equal(nRequest, res.Value.Count(x => x is RestRequest));
     }
 
     const string Request0 = "GET https://example.com";
@@ -99,7 +100,7 @@ public class HttpParserTest
     [InlineData(Request2, 2, true)]
     public void Request(string input, int count, bool isBody)
     {
-        var res = HttpParser.RequestParser.TryParse(input);
+        var res = RestParser.RequestParser.TryParse(input);
         Assert.True(res.WasSuccessful);
         Assert.Equal(count, res.Value.Headers.Count());
         if (isBody)

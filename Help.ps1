@@ -11,6 +11,26 @@ $Environment = @'
 		Set-RestEnvironment. In most cases this parameter is not used directly.
 '@
 
+### Invoke-RestHttp
+@{
+	command = 'Invoke-RestHttp'
+	synopsis = 'Invokes VSCode REST Client files (.http, .rest).'
+	description = @'
+	Parses and invokes an HTTP request from VSCode REST Client file (.http,
+	.rest) or provided as Text and returns the response body string, either
+	as formatted JSON or as is.
+
+	Unlike other cmdlets, Invoke-RestHttp does not require Set-RestEnvironment.
+	If $RestEnvironment is not found, Invoke-RestHttp assumes default Name and
+	Path, either the input file directory or current location with Text.
+'@
+	parameters = @{
+		Path = 'The HTTP file.'
+		Text = 'The HTTP text.'
+		Environment = $Environment
+	}
+}
+
 ### Set-RestEnvironment
 @{
 	command = 'Set-RestEnvironment'
@@ -49,22 +69,6 @@ $Environment = @'
 		Specifies the directory used for files discovery.
 		Default: The current location.
 '@
-	}
-}
-
-### Invoke-RestHttp
-@{
-	command = 'Invoke-RestHttp'
-	synopsis = 'Invokes VSCode REST Client files (.http, .rest).'
-	description = @'
-	Parses and invokes an HTTP request from VSCode REST Client file (.http,
-	.rest) or provided as Text and returns the response body string, either
-	as formatted JSON or as is.
-'@
-	parameters = @{
-		Path = 'The HTTP file.'
-		Text = 'The HTTP text.'
-		Environment = $Environment
 	}
 }
 

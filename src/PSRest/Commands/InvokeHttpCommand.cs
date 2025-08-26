@@ -15,10 +15,10 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
     const string PsnText = "Text";
 
     [Parameter(Position = 0, Mandatory = true, ParameterSetName = PsnMain)]
-    public string Path { get; set; } = null!;
+    public string? Path { get; set; }
 
     [Parameter(Mandatory = true, ParameterSetName = PsnText)]
-    public string Text { get; set; } = null!;
+    public string? Text { get; set; }
 
     readonly JsonSerializerOptions s_JsonSerializerOptions = new()
     {
@@ -28,53 +28,71 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 
     protected override void BeginProcessing()
     {
-        string text = ParameterSetName switch
+        RestEnvironment environment;
+        string text;
+        switch (ParameterSetName)
         {
-            PsnMain => File.ReadAllText(GetUnresolvedProviderPathFromPSPath(Path)),
-            PsnText => Text,
-            _ => throw new NotImplementedException()
-        };
+            case PsnMain:
+                var path = GetUnresolvedProviderPathFromPSPath(Path);
+                environment = GetOrCreateEnvironment(System.IO.Path.GetDirectoryName(path)!);
+                text = File.ReadAllText(path);
+                break;
+            case PsnText:
+                environment = GetOrCreateEnvironment(SessionState.Path.CurrentFileSystemLocation.ProviderPath);
+                text = Text!;
+                break;
+            default:
+                throw new NotImplementedException();
+        }
 
-        text = Environment.ExpandVariables(text);
-
-        var parsed = HttpParser.Parser.TryParse(text);
+        var parsed = RestParser.Parser.TryParse(text);
         if (!parsed.WasSuccessful)
             throw new InvalidOperationException($"Parsing '{Path}: {parsed.Message}");
 
-        var request = parsed.Value.FirstOrDefault(x => x is HttpRequest) as HttpRequest ??
-            throw new InvalidOperationException($"Parsing '{Path}: request is not found.");
+        var request = parsed.Value.FirstOrDefault(x => x is RestRequest) as RestRequest ??
+            throw new InvalidOperationException($"Parsing '{Path}: HTTP request is not found.");
 
-        if (parsed.Value.FirstOrDefault(x => x is HttpVariable) is { })
-            throw new NotSupportedException($"Parsing '{Path}: file variables are not yet supported.");
+        // get variables first, new override old, then expand
+        var variables = new Dictionary<string, string>();
+        {
+            foreach (var it in parsed.Value)
+            {
+                if (it is RestVariable var)
+                    variables[var.Name] = var.Value;
+            }
 
-        var bodyString = request.Body;
+            foreach (var kv in variables)
+                variables[kv.Key] = environment.ExpandVariables(kv.Value, variables);
+        }
+
+        var expBody = request.Body is null ? null : environment.ExpandVariables(request.Body, variables);
         if (request.Headers.FirstOrDefault(x => x.Key == "X-REQUEST-TYPE").Value == "GraphQL")
         {
             if (request.Method != "POST")
                 throw new InvalidOperationException($"Expected 'POST' method for GraphQL requests, found '{request.Method}'");
 
-            if (bodyString is null)
+            if (expBody is null)
                 throw new InvalidOperationException("GraphQL request should have body.");
 
             var body = new
             {
-                query = bodyString,
+                query = expBody,
             };
 
-            bodyString = JsonSerializer.Serialize(body);
+            expBody = JsonSerializer.Serialize(body);
         }
 
-        var message = new HttpRequestMessage(HttpMethod.Parse(request.Method), request.Url);
+        var expUrl = environment.ExpandVariables(request.Url, variables);
+        var message = new HttpRequestMessage(HttpMethod.Parse(request.Method), expUrl);
 
         foreach (var header in request.Headers)
         {
-            message.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            var expValue = environment.ExpandVariables(header.Value, variables);
+            message.Headers.TryAddWithoutValidation(header.Key, expValue);
         }
 
-        if (bodyString is { })
-        {
-            message.Content = new StringContent(bodyString, Encoding.UTF8, Const.MediaTypeJson);
-        };
+        if (expBody is { })
+            message.Content = new StringContent(expBody, Encoding.UTF8, Const.MediaTypeJson);
 
         var client = new HttpClient();
         HttpResponseMessage response = client.Send(message);

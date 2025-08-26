@@ -1,5 +1,13 @@
 # PSRest Release Notes
 
+## v0.1.1
+
+Support file variables.
+
+Fix a few issues and REST Client differences.
+
+`Invoke-RestHttp` does not require `Set-RestEnvironment`.
+
 ## v0.1.0
 
 New cmdlet `Invoke-RestHttp` (.http, .rest) invokes the first HTTP request with

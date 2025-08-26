@@ -11,6 +11,13 @@ public sealed class ResolveVariableCommand : BaseEnvironmentCmdlet
     [AllowNull]
     public string?[]? Value { get; set; }
 
+    RestEnvironment _environment = null!;
+
+    protected override void BeginProcessing()
+    {
+        _environment = GetCurrentEnvironment();
+    }
+
     protected override void ProcessRecord()
     {
         if (Value is { })
@@ -20,7 +27,7 @@ public sealed class ResolveVariableCommand : BaseEnvironmentCmdlet
                 if (string.IsNullOrEmpty(it))
                     WriteObject(it);
                 else
-                    WriteObject(Environment.ExpandVariables(it));
+                    WriteObject(_environment.ExpandVariables(it));
             }
         }
     }
