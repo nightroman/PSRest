@@ -17,9 +17,13 @@ public class RestVariable : IRestSyntax
 
 public class RestRequest : IRestSyntax
 {
+    public RestRequest(IEnumerable<KeyValuePair<string, string>> headers)
+    {
+        Headers = new(headers, StringComparer.OrdinalIgnoreCase);
+    }
     public required string Method { get; init; }
     public required string Url { get; init; }
     public required Version? Version { get; init; }
-    public required Dictionary<string, string> Headers { get; init; }
+    public Dictionary<string, string> Headers { get; }
     public required string Body { get; init; }
 }

@@ -8,17 +8,27 @@ namespace PSRest;
 
 public partial class RestEnvironment
 {
-    readonly string _envName;
-    readonly string _workDir;
+    readonly string _Name;
+    readonly string _Path;
+    readonly string? _DotEnvFile;
+    readonly string? _SettingsFile;
 
     Dictionary<string, string>? _dataEnvCurrent;
     Dictionary<string, string>? _dataEnvShared;
     Dictionary<string, string>? _dataDotEnv;
 
-    public RestEnvironment(string workDir, string? envName)
+    public record Args(
+        string Path,
+        string? Name = null,
+        string? DotEnvFile = null,
+        string? SettingsFile = null);
+
+    public RestEnvironment(Args args)
     {
-        _envName = envName ?? Environment.GetEnvironmentVariable(Const.EnvVarDefault) ?? Const.EnvNameShared;
-        _workDir = workDir;
+        _Name = args.Name ?? Environment.GetEnvironmentVariable(Const.EnvVarDefault) ?? Const.EnvNameShared;
+        _Path = args.Path;
+        _DotEnvFile = args.DotEnvFile;
+        _SettingsFile = args.SettingsFile;
     }
 
     public string? GetVariable(string name, VariableType type, Dictionary<string, string>? vars = null)
@@ -74,7 +84,7 @@ public partial class RestEnvironment
     {
         if (_dataDotEnv is null)
         {
-            var path = Path.Join(_workDir, Const.DotEnvFile);
+            var path = _DotEnvFile ?? Path.Join(_Path, Const.DotEnvFile);
             try
             {
                 _dataDotEnv = Env.NoEnvVars().Load(path).ToDotEnvDictionary(CreateDictionaryOption.TakeFirst);
@@ -107,7 +117,7 @@ public partial class RestEnvironment
 
     void InitEnv()
     {
-        var path = GetSettingsPath(_workDir) ??
+        var path = _SettingsFile ?? GetSettingsPath(_Path) ??
             throw new InvalidOperationException("Cannot find '.vscode/settings.json'.");
 
         try
@@ -126,11 +136,11 @@ public partial class RestEnvironment
                     _dataEnvShared.Add(it.Name, it.Value.ToString());
             }
 
-            if (_envName == Const.EnvNameShared)
+            if (_Name == Const.EnvNameShared)
                 return;
 
-            if (!root.TryGetProperty(_envName, out var current))
-                throw new InvalidOperationException($"Cannot find environment '{_envName}'.");
+            if (!root.TryGetProperty(_Name, out var current))
+                throw new InvalidOperationException($"Cannot find environment '{_Name}'.");
 
             _dataEnvCurrent = [];
             foreach (var it in current.EnumerateObject())

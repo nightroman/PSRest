@@ -43,6 +43,10 @@ $Environment = @'
 	If Set-RestEnvironment is not invoked or its $RestEnvironment is not in
 	the current or parent scope, other PSRest commands may fail. They might
 	need their own Set-RestEnvironment invoked or $RestEnvironment exposed.
+
+	Parameters DotEnvFile and SettingsFile give more control on settings.
+	The default REST Client required files layout is strict: ".env" and
+	".vscode/settings.json".
 '@
 	parameters = @{
 		Name = @'
@@ -68,6 +72,12 @@ $Environment = @'
 		Path = @'
 		Specifies the directory used for files discovery.
 		Default: The current location.
+'@
+		DotEnvFile = @'
+		Specifies ".env" file explicitly.
+'@
+		SettingsFile = @'
+		Specifies ".vscode/settings.json" file explicitly.
 '@
 	}
 }

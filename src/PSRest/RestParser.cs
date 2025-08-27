@@ -85,12 +85,11 @@ public static class RestParser
         from requestLine in RequestLineParser
         from headers in HeaderParser.Many()
         from body in BodyParser.Optional()
-        select new RestRequest
+        select new RestRequest(headers)
         {
             Method = requestLine.Item1,
             Url = requestLine.Item2,
             Version = requestLine.Item3,
-            Headers = new Dictionary<string, string>(headers),
             Body = body.GetOrDefault()
         };
 

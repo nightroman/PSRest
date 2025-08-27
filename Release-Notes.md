@@ -1,5 +1,11 @@
 # PSRest Release Notes
 
+## v0.1.3
+
+`Set-RestEnvironment`: new parameters `DotEnvFile`, `SettingsFile`.
+
+Use case insensitive request headers.
+
 ## v0.1.2
 
 Support and use HTTP version in request line.

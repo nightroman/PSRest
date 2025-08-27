@@ -65,8 +65,11 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
                 variables[kv.Key] = environment.ExpandVariables(kv.Value, variables);
         }
 
+        // body
         var expBody = request.Body is null ? null : environment.ExpandVariables(request.Body, variables);
-        if (request.Headers.FirstOrDefault(x => x.Key == "X-REQUEST-TYPE").Value == "GraphQL")
+
+        // GraphQL body
+        if (request.Headers.TryGetValue("X-REQUEST-TYPE", out var requestType) && requestType.Equals("GraphQL", StringComparison.OrdinalIgnoreCase))
         {
             if (request.Method != "POST")
                 throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Method}'");
@@ -82,21 +85,26 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             expBody = JsonSerializer.Serialize(body);
         }
 
+        // HTTP request message with URL
         var expUrl = environment.ExpandVariables(request.Url, variables);
         var message = new HttpRequestMessage(HttpMethod.Parse(request.Method), expUrl);
 
+        // HTTP version
         if (request.Version != default)
             message.Version = request.Version;
 
+        // HTTP headers
         foreach (var header in request.Headers)
         {
             var expValue = environment.ExpandVariables(header.Value, variables);
             message.Headers.TryAddWithoutValidation(header.Key, expValue);
         }
 
+        // HTTP content
         if (expBody is { })
             message.Content = new StringContent(expBody, Encoding.UTF8, Const.MediaTypeJson);
 
+        // HTTP client, send
         var client = new HttpClient();
         HttpResponseMessage response = client.Send(message);
 
@@ -105,6 +113,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         if (!response.IsSuccessStatusCode)
             throw new InvalidOperationException(contentString);
 
+        // JSON, format
         if (response.Content.Headers.ContentType?.MediaType == Const.MediaTypeJson)
         {
             try

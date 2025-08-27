@@ -29,6 +29,6 @@ public abstract class BaseEnvironmentCmdlet : PSCmdlet
     /// </summary>
     protected RestEnvironment GetOrCreateEnvironment(string dir)
     {
-        return _Environment ?? new RestEnvironment(dir, null);
+        return _Environment ?? new RestEnvironment(new(dir));
     }
 }
