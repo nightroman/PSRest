@@ -67,10 +67,10 @@ public class RestParserTest
         Assert.Equal(nRequest, res.Value.Count(x => x is RestRequest));
     }
 
-    const string Request0 = "GET https://example.com";
+    const string Request0 = "GET https://example.com HTTP/1.1";
 
     const string Request1 = """
-        POST https://example.com/1
+        POST https://example.com/1 HTTP/1.1
         Authorization: Bearer {{token}}
         Content-Type: application/json
 
@@ -95,21 +95,27 @@ public class RestParserTest
         """;
 
     [Theory]
-    [InlineData(Request0, 0, false)]
-    [InlineData(Request1, 2, true)]
-    [InlineData(Request2, 2, true)]
-    public void Request(string input, int count, bool isBody)
+    [InlineData(Request0, 0, false, "1.1")]
+    [InlineData(Request1, 2, true, "1.1")]
+    [InlineData(Request2, 2, true, "")]
+    public void Request(string input, int count, bool isBody, string version)
     {
         var res = RestParser.RequestParser.TryParse(input);
         Assert.True(res.WasSuccessful);
-        Assert.Equal(count, res.Value.Headers.Count());
+
+        var request = res.Value;
+        Assert.Equal(count, request.Headers.Count);
+        if (request.Version != default)
+        {
+            Assert.Equal(version, request.Version.ToString());
+        }
         if (isBody)
         {
-            Assert.True(res.Value.Body.TrimEnd().EndsWith('}'));
+            Assert.True(request.Body.TrimEnd().EndsWith('}'));
         }
         else
         {
-            Assert.Null(res.Value.Body);
+            Assert.Null(request.Body);
         }
     }
 }

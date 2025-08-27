@@ -19,6 +19,7 @@ public class RestRequest : IRestSyntax
 {
     public required string Method { get; init; }
     public required string Url { get; init; }
+    public required Version? Version { get; init; }
     public required Dictionary<string, string> Headers { get; init; }
     public required string Body { get; init; }
 }

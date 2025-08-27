@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.1.2
+
+Support and use HTTP version in request line.
+
 ## v0.1.1
 
 Support file variables.

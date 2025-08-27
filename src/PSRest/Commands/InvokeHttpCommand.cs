@@ -47,10 +47,10 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 
         var parsed = RestParser.Parser.TryParse(text);
         if (!parsed.WasSuccessful)
-            throw new InvalidOperationException($"Parsing '{Path}: {parsed.Message}");
+            throw new FormatException($"Parsing '{Path}: {parsed.Message}");
 
         var request = parsed.Value.FirstOrDefault(x => x is RestRequest) as RestRequest ??
-            throw new InvalidOperationException($"Parsing '{Path}: HTTP request is not found.");
+            throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
 
         // get variables first, new override old, then expand
         var variables = new Dictionary<string, string>();
@@ -69,10 +69,10 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         if (request.Headers.FirstOrDefault(x => x.Key == "X-REQUEST-TYPE").Value == "GraphQL")
         {
             if (request.Method != "POST")
-                throw new InvalidOperationException($"Expected 'POST' method for GraphQL requests, found '{request.Method}'");
+                throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Method}'");
 
             if (expBody is null)
-                throw new InvalidOperationException("GraphQL request should have body.");
+                throw new FormatException("GraphQL request should have body.");
 
             var body = new
             {
@@ -84,6 +84,9 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 
         var expUrl = environment.ExpandVariables(request.Url, variables);
         var message = new HttpRequestMessage(HttpMethod.Parse(request.Method), expUrl);
+
+        if (request.Version != default)
+            message.Version = request.Version;
 
         foreach (var header in request.Headers)
         {

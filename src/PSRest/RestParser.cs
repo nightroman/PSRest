@@ -5,6 +5,18 @@ namespace PSRest;
 
 public static class RestParser
 {
+    static T Catch<T>(Func<T> @try, Func<Exception, T> @catch)
+    {
+        try
+        {
+            return @try();
+        }
+        catch (Exception ex)
+        {
+            return @catch(ex);
+        }
+    }
+
     public static readonly Parser<IRestSyntax> WhiteSpaceParser =
         from _ in Parse.WhiteSpace.AtLeastOnce()
         select (IRestSyntax)null!;
@@ -37,13 +49,19 @@ public static class RestParser
         .Text();
 
     public static readonly Parser<string> UrlParser =
-        Parse.CharExcept("\r\n").Many().Text().Token();
+        Parse.CharExcept(" \r\n").Many().Text().Token();
 
-    public static readonly Parser<(string, string)> RequestLineParser =
+    public static readonly Parser<Version> HttpVersionParser =
+        from http in Parse.String("HTTP/")
+        from version in Parse.CharExcept("\r\n").AtLeastOnce().Text().Token()
+        select Catch(() => new Version(version), ex => throw new FormatException($"HTTP version '{version}': {ex.Message}", ex));
+
+    public static readonly Parser<(string, string, Version)> RequestLineParser =
         from method in MethodParser
         from ws in Parse.WhiteSpace.AtLeastOnce()
         from url in UrlParser
-        select (method, url);
+        from version in HttpVersionParser.Optional()
+        select (method, url, version.GetOrDefault());
 
     public static readonly Parser<KeyValuePair<string, string>> HeaderParser =
         from key in Parse.Char(c => !char.IsWhiteSpace(c) && c != ':', "key").Many().Text().Token()
@@ -64,13 +82,14 @@ public static class RestParser
         select string.Join('\n', lines);
 
     public static readonly Parser<RestRequest> RequestParser =
-        from reqLine in RequestLineParser
+        from requestLine in RequestLineParser
         from headers in HeaderParser.Many()
         from body in BodyParser.Optional()
         select new RestRequest
         {
-            Method = reqLine.Item1,
-            Url = reqLine.Item2,
+            Method = requestLine.Item1,
+            Url = requestLine.Item2,
+            Version = requestLine.Item3,
             Headers = new Dictionary<string, string>(headers),
             Body = body.GetOrDefault()
         };
