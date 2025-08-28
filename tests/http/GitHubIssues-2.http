@@ -1,0 +1,27 @@
+# Invoke-RestHttp, GraphQL with variables
+
+POST {{GitHubApiUrl}}
+Content-Type: application/json
+X-Request-Type: GraphQL
+Authorization: Bearer {{$processEnv GITHUB_TOKEN}}
+User-Agent: {{$dotenv user}}
+
+query GitHubIssues($login: String!) {
+  user(login: $login) {
+    issues(
+      first: 10
+      states: [OPEN]
+      orderBy: { direction: DESC, field: CREATED_AT }
+    ) {
+      totalCount
+      nodes {
+        title
+        url
+      }
+    }
+  }
+}
+
+{
+  "login": "{{$dotenv user}}"
+}

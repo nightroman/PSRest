@@ -1,5 +1,11 @@
 # PSRest Release Notes
 
+## v0.2.0
+
+`Set-RestEnvironment`
+- Support GraphQL variables.
+- Fix variables and output issues.
+
 ## v0.1.3
 
 `Set-RestEnvironment`: new parameters `DotEnvFile`, `SettingsFile`.

@@ -2,11 +2,10 @@
 using DotNetEnv;
 using DotNetEnv.Extensions;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace PSRest;
 
-public partial class RestEnvironment
+public class RestEnvironment
 {
     readonly string _Name;
     readonly string _Path;
@@ -171,7 +170,7 @@ public partial class RestEnvironment
 
     public string ExpandVariables(string value, Dictionary<string, string>? vars = null)
     {
-        var mm = RegexVariable().Matches(value);
+        var mm = Regexes.RestVariable().Matches(value);
         for (int i = mm.Count; --i >= 0;)
         {
             var m = mm[i];
@@ -181,7 +180,4 @@ public partial class RestEnvironment
         }
         return value;
     }
-
-    [GeneratedRegex("{{(.+?)}}")]
-    private static partial Regex RegexVariable();
 }

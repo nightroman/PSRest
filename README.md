@@ -20,12 +20,12 @@ Install-Module PSRest
 ## Roadmap
 
 - [x] Environments and variables `{{var}}`, `{{$shared var}}`, `{{$dotenv var}}`, `{{$processEnv var}}`
-- [ ] Parse and invoke REST Client files `.http` / `.rest` (GraphQL and HTTP requests)
+- [ ] Parse and invoke REST Client files `.http`, `.rest`
     - [x] Add `Invoke-RestHttp`
     - [x] Support file variables
-    - [ ] Support GraphQL variables
-    - [ ] Other content types in addition to JSON
-    - [ ] Support request body or GraphQL in files
+    - [x] Support GraphQL variables
+    - [ ] Support GraphQL or request body in file
+    - [ ] Support GraphQL operation name to invoke
 
 ## See also
 

@@ -20,11 +20,26 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
     [Parameter(Mandatory = true, ParameterSetName = PsnText)]
     public string? Text { get; set; }
 
-    readonly JsonSerializerOptions s_JsonSerializerOptions = new()
+    static readonly JsonSerializerOptions s_JsonSerializerOptions = new()
     {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         WriteIndented = true,
     };
+
+    static string BodyToGraphQL(string body)
+    {
+        string[] parts = Regexes.EmptyLine().Split(body, 2);
+
+        object? variables = null;
+        if (parts.Length > 1)
+            variables = JsonSerializer.Deserialize<object>(parts[1]);
+
+        return JsonSerializer.Serialize(new
+        {
+            query = parts[0],
+            variables
+        });
+    }
 
     protected override void BeginProcessing()
     {
@@ -69,20 +84,18 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         var expBody = request.Body is null ? null : environment.ExpandVariables(request.Body, variables);
 
         // GraphQL body
-        if (request.Headers.TryGetValue("X-REQUEST-TYPE", out var requestType) && requestType.Equals("GraphQL", StringComparison.OrdinalIgnoreCase))
+        if (request.Headers.TryGetValue(Const.XRequestType, out var requestType) && requestType.Equals("GraphQL", StringComparison.OrdinalIgnoreCase))
         {
+            //! as REST Client
+            request.Headers.Remove(Const.XRequestType);
+
             if (request.Method != "POST")
                 throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Method}'");
 
             if (expBody is null)
                 throw new FormatException("GraphQL request should have body.");
 
-            var body = new
-            {
-                query = expBody,
-            };
-
-            expBody = JsonSerializer.Serialize(body);
+            expBody = BodyToGraphQL(expBody);
         }
 
         // HTTP request message with URL
@@ -114,7 +127,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             throw new InvalidOperationException(contentString);
 
         // JSON, format
-        if (response.Content.Headers.ContentType?.MediaType == Const.MediaTypeJson)
+        if (response.Content.Headers.ContentType?.MediaType?.Contains("json", StringComparison.OrdinalIgnoreCase) == true)
         {
             try
             {

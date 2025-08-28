@@ -28,3 +28,16 @@ task Basic-2 {
 	equals $d.oops "{{missing}}"
 	equals $d.age 42L
 }
+
+task GitHubIssues {
+	Set-RestEnvironment local
+	($r = Invoke-RestHttp http/GitHubIssues-2.http)
+	$r = ConvertFrom-Json $r
+
+	$h = $r.Headers
+	equals $h."User-Agent" "admin"
+
+	$d = $r.Data
+	assert ($d.query -match '(?s)^query GitHubIssues.*}$')
+	equals $d.variables.login admin
+}

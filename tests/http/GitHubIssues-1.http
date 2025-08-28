@@ -1,8 +1,8 @@
-# Invoke-RestHttp
+# Invoke-RestHttp, GraphQL no variables
 
-POST https://api.github.com/graphql
+POST {{GitHubApiUrl}}
 Content-Type: application/json
-X-REQUEST-TYPE: GraphQL
+X-Request-Type: GraphQL
 Authorization: Bearer {{$processEnv GITHUB_TOKEN}}
 User-Agent: {{$dotenv user}}
 

@@ -23,20 +23,17 @@ task processEnv {
 }
 
 task dotEnv {
-	$env:key1 = $null
+	$env:user = $null
 	Set-RestEnvironment
 
 	$r = Get-RestVariable missing -Type DotEnv
 	equals $r $null
 
-	$r = Get-RestVariable key1 -Type DotEnv
-	equals $r DotEnv1
-
-	$r = Get-RestVariable key2 -Type DotEnv
-	equals $r DotEnv2
+	$r = Get-RestVariable user -Type DotEnv
+	equals $r admin
 
 	#! cover .env is not loaded into process
-	equals $env:key1 $null
+	equals $env:user $null
 }
 
 task env {
@@ -79,16 +76,16 @@ task resolve_shared {
 	$env:test = 42
 	Set-RestEnvironment
 
-	$1, $2 = '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv key1}} // {{$processEnv test}}>>' | Resolve-RestVariable
+	$1, $2 = '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>' | Resolve-RestVariable
 	equals $1 '<<v1 // {{$shared token}}>>'
-	equals $2 '<<DotEnv1 // 42>>'
+	equals $2 '<<admin // 42>>'
 }
 
 task resolve_local {
 	$env:test = 42
 	Set-RestEnvironment local
 
-	$1, $2 = Resolve-RestVariable '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv key1}} // {{$processEnv test}}>>'
+	$1, $2 = Resolve-RestVariable '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>'
 	equals $1 '<<v2 // {{$shared token}}>>'
-	equals $2 '<<DotEnv1 // 42>>'
+	equals $2 '<<admin // 42>>'
 }

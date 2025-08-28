@@ -117,8 +117,9 @@ task pushPSGallery package, {
 
 task unit {
 	Set-Location src\PSRest.Test
-	exec { dotnet run -c Release }
-	remove bin, obj
+	exec { dotnet build -c Release -p:skip_publish=1 }
+	exec { dotnet run -c Release --no-build }
+	remove ..\*\bin, ..\*\obj
 }
 
 task test {

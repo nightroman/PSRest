@@ -11,6 +11,7 @@ static class Const
     public const string SettingsKeyRoot = "rest-client.environmentVariables";
     public const string VarRestEnvironment = "RestEnvironment";
     public const string VSCodeDir = ".vscode";
+    public const string XRequestType = "X-Request-Type";
 
     public const string VarTypeShared = "$shared";
     public const string VarTypeDotEnv = "$dotenv";
