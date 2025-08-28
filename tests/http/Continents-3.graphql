@@ -1,0 +1,7 @@
+
+query Continents {
+  continents(filter: {code: {regex: "{{$dotenv continentsRegex}}"}}) {
+    code
+    name
+  }
+}

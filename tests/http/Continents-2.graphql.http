@@ -1,0 +1,15 @@
+# Invoke-RestHttp // GraphQL file // GraphQL variables
+
+POST {{countriesApi}}
+Content-Type: application/json
+X-Request-Type: GraphQL
+
+< Continents-2.graphql
+
+{
+  "filter": {
+    "code": {
+      "regex": "A"
+    }
+  }
+}

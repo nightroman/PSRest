@@ -24,8 +24,8 @@ Install-Module PSRest
     - [x] Add `Invoke-RestHttp`
     - [x] Support file variables
     - [x] Support GraphQL variables
-    - [ ] Support GraphQL or request body in file
-    - [ ] Support GraphQL operation name to invoke
+    - [x] Support GraphQL and content files
+    - [ ] Support GraphQL selected operations
 
 ## See also
 

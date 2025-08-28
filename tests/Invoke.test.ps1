@@ -1,3 +1,11 @@
+<#
+.Synopsis
+	Tests Invoke-RestHttp.
+
+.Notes
+	Do not move this file to "http" to make it simpler (tempting).
+	Instead use Set-RestEnvironment with "http" to cover issues.
+#>
 
 Set-StrictMode -Version 3
 Import-Module PSRest
@@ -24,20 +32,63 @@ task Basic-2 {
 
 	$d = $r.Data
 	equals $d.version "v1"
-	equals $d.user "nightroman"
+	equals $d.user "admin"
 	equals $d.oops "{{missing}}"
 	equals $d.age 42L
 }
 
-task GitHubIssues {
-	Set-RestEnvironment local
-	($r = Invoke-RestHttp http/GitHubIssues-2.http)
+task Basic-3 {
+	$r = Invoke-RestHttp http/Basic-3.json.http
+	$r = ConvertFrom-Json $r
+
+	$h = $r.Headers
+	equals $h.Age "42"
+
+	$q = $r.Query
+	equals $q.param1 "42"
+
+	$d = $r.Data
+	equals $d.version "v1"
+	equals $d.user "admin"
+	equals $d.oops "{{missing}}"
+	equals $d.age 42L
+}
+
+task Continents-1 {
+	Set-RestEnvironment '' http
+	($r = Invoke-RestHttp http/Continents-1.http)
+	$r = ConvertFrom-Json $r
+
+	equals 5 $r.Data.continents.Count
+}
+
+task Continents-1-local {
+	Set-RestEnvironment local http
+	($r = Invoke-RestHttp http/Continents-1.http)
 	$r = ConvertFrom-Json $r
 
 	$h = $r.Headers
 	equals $h."User-Agent" "admin"
 
 	$d = $r.Data
-	assert ($d.query -match '(?s)^query GitHubIssues.*}$')
-	equals $d.variables.login admin
+	assert ($d.query -match '(?s)^query Continents.*}$')
+	equals $d.variables $null
+}
+
+task Continents-2 {
+	Set-RestEnvironment '' http
+	($r = Invoke-RestHttp http/Continents-2.graphql.http)
+	$r = ConvertFrom-Json $r
+
+	equals 5 $r.Data.continents.Count
+}
+
+task Continents-2-local {
+	Set-RestEnvironment local http
+	($r = Invoke-RestHttp http/Continents-2.graphql.http)
+	$r = ConvertFrom-Json $r
+
+	$d = $r.Data
+	assert ($d.query -match '(?s)^query Continents.*}$')
+	equals $d.variables.filter.code.regex A
 }

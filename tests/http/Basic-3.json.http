@@ -1,4 +1,4 @@
-﻿# Invoke-RestHttp // HTTP // content with variables
+﻿# Invoke-RestHttp // HTTP // file with expanded variables
 
 // file variables // using later vars is fine
 @var2 = {{var1}}
@@ -9,9 +9,4 @@ POST http://127.0.0.1:55000/show?param1={{var2}}
 content-type: application/json
 age: {{var2}}
 
-{
-  "version": "{{version}}",
-  "user": "{{$dotenv user}}",
-  "oops": "{{missing}}",
-  "age": {{var2}}
-}
+<@ Basic-3.json

@@ -1,0 +1,7 @@
+# Invoke-RestHttp // GraphQL file with expanded variables
+
+POST {{countriesApi}}
+Content-Type: application/json
+X-Request-Type: GraphQL
+
+<@ Continents-3.graphql

@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.3.0
+
+Support GraphQL and content files: `< {file}` (literal), `<@ {file}` (expanded variables).
+
 ## v0.2.0
 
 `Set-RestEnvironment`

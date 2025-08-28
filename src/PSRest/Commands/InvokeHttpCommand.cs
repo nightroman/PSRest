@@ -4,6 +4,7 @@ using System.Management.Automation;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using IOPath = System.IO.Path;
 
 namespace PSRest.Commands;
 
@@ -20,15 +21,29 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
     [Parameter(Mandatory = true, ParameterSetName = PsnText)]
     public string? Text { get; set; }
 
-    static readonly JsonSerializerOptions s_JsonSerializerOptions = new()
-    {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        WriteIndented = true,
-    };
+    static readonly JsonSerializerOptions s_JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true };
 
-    static string BodyToGraphQL(string body)
+    string _location = null!;
+    RestEnvironment _environment = null!;
+    Dictionary<string, string> _variables = null!;
+
+    string BodyToContent(string body)
+    {
+        if (!body.StartsWith('<'))
+            return body;
+
+        bool expand = body.StartsWith("<@");
+        var path = IOPath.Combine(_location, body[(expand ? 2 : 1)..].Trim());
+
+        body = File.ReadAllText(path).Trim();
+        return expand ? _environment.ExpandVariables(body, _variables) : body;
+    }
+
+    string BodyToGraphQL(string body)
     {
         string[] parts = Regexes.EmptyLine().Split(body, 2);
+
+        var query = BodyToContent(parts[0]);
 
         object? variables = null;
         if (parts.Length > 1)
@@ -36,29 +51,29 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 
         return JsonSerializer.Serialize(new
         {
-            query = parts[0],
+            query,
             variables
         });
     }
 
     protected override void BeginProcessing()
     {
-        RestEnvironment environment;
         string text;
         switch (ParameterSetName)
         {
             case PsnMain:
-                var path = GetUnresolvedProviderPathFromPSPath(Path);
-                environment = GetOrCreateEnvironment(System.IO.Path.GetDirectoryName(path)!);
-                text = File.ReadAllText(path);
+                Path = GetUnresolvedProviderPathFromPSPath(Path);
+                _location = IOPath.GetDirectoryName(Path)!;
+                text = File.ReadAllText(Path);
                 break;
             case PsnText:
-                environment = GetOrCreateEnvironment(SessionState.Path.CurrentFileSystemLocation.ProviderPath);
+                _location = SessionState.Path.CurrentFileSystemLocation.ProviderPath;
                 text = Text!;
                 break;
             default:
                 throw new NotImplementedException();
         }
+        _environment = GetOrCreateEnvironment(_location);
 
         var parsed = RestParser.Parser.TryParse(text);
         if (!parsed.WasSuccessful)
@@ -68,22 +83,22 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
 
         // get variables first, new override old, then expand
-        var variables = new Dictionary<string, string>();
+        _variables = [];
         {
             foreach (var it in parsed.Value)
             {
                 if (it is RestVariable var)
-                    variables[var.Name] = var.Value;
+                    _variables[var.Name] = var.Value;
             }
 
-            foreach (var kv in variables)
-                variables[kv.Key] = environment.ExpandVariables(kv.Value, variables);
+            foreach (var kv in _variables)
+                _variables[kv.Key] = _environment.ExpandVariables(kv.Value, _variables);
         }
 
         // body
-        var expBody = request.Body is null ? null : environment.ExpandVariables(request.Body, variables);
+        var expBody = request.Body is null ? null : _environment.ExpandVariables(request.Body, _variables);
 
-        // GraphQL body
+        // GraphQL or content body
         if (request.Headers.TryGetValue(Const.XRequestType, out var requestType) && requestType.Equals("GraphQL", StringComparison.OrdinalIgnoreCase))
         {
             //! as REST Client
@@ -97,9 +112,13 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 
             expBody = BodyToGraphQL(expBody);
         }
+        else if (expBody is { })
+        {
+            expBody = BodyToContent(expBody);
+        }
 
         // HTTP request message with URL
-        var expUrl = environment.ExpandVariables(request.Url, variables);
+        var expUrl = _environment.ExpandVariables(request.Url, _variables);
         var message = new HttpRequestMessage(HttpMethod.Parse(request.Method), expUrl);
 
         // HTTP version
@@ -109,7 +128,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         // HTTP headers
         foreach (var header in request.Headers)
         {
-            var expValue = environment.ExpandVariables(header.Value, variables);
+            var expValue = _environment.ExpandVariables(header.Value, _variables);
             message.Headers.TryAddWithoutValidation(header.Key, expValue);
         }
 

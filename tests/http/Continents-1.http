@@ -1,0 +1,13 @@
+# Invoke-RestHttp // GraphQL content // no GraphQL variables
+
+POST {{countriesApi}}
+Content-Type: application/json
+X-Request-Type: GraphQL
+User-Agent: {{$dotenv user}}
+
+query Continents {
+  continents(filter: {code: {regex: "{{$dotenv continentsRegex}}"}}) {
+    code
+    name
+  }
+}

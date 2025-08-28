@@ -51,7 +51,8 @@ $Environment = @'
 	parameters = @{
 		Name = @'
 		Specifies the environment name, one of defined in ".vscode/settings.json".
-		Default: $env:REST_ENV
+
+		If Name is empty then not empty $env:REST_ENV is used or default '$shared'.
 
 		Example: '$shared' (default), 'local', 'production':
 

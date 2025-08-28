@@ -1,3 +1,7 @@
+<#
+.Synopsis
+	Tests Get-RestVariable, Resolve-RestVariable.
+#>
 
 Set-StrictMode -Version 3
 Import-Module PSRest
@@ -24,7 +28,7 @@ task processEnv {
 
 task dotEnv {
 	$env:user = $null
-	Set-RestEnvironment
+	Set-RestEnvironment '' http
 
 	$r = Get-RestVariable missing -Type DotEnv
 	equals $r $null
@@ -37,7 +41,7 @@ task dotEnv {
 }
 
 task env {
-	Set-RestEnvironment
+	Set-RestEnvironment '' http
 
 	$r = Get-RestVariable missing
 	equals $r $null
@@ -47,7 +51,7 @@ task env {
 }
 
 task local {
-	Set-RestEnvironment local
+	Set-RestEnvironment local http
 
 	$r = Get-RestVariable missing
 	equals $r $null
@@ -60,7 +64,7 @@ task local {
 }
 
 task production {
-	Set-RestEnvironment production
+	Set-RestEnvironment production http
 
 	$r = Get-RestVariable missing
 	equals $r $null
@@ -74,7 +78,7 @@ task production {
 
 task resolve_shared {
 	$env:test = 42
-	Set-RestEnvironment
+	Set-RestEnvironment '' http
 
 	$1, $2 = '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>' | Resolve-RestVariable
 	equals $1 '<<v1 // {{$shared token}}>>'
@@ -83,7 +87,7 @@ task resolve_shared {
 
 task resolve_local {
 	$env:test = 42
-	Set-RestEnvironment local
+	Set-RestEnvironment local http
 
 	$1, $2 = Resolve-RestVariable '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>'
 	equals $1 '<<v2 // {{$shared token}}>>'

@@ -24,7 +24,11 @@ public class RestEnvironment
 
     public RestEnvironment(Args args)
     {
-        _Name = args.Name ?? Environment.GetEnvironmentVariable(Const.EnvVarDefault) ?? Const.EnvNameShared;
+        _Name =
+            args.Name is { } name1 && name1.Length > 0 ? name1 :
+            Environment.GetEnvironmentVariable(Const.EnvVarDefault) is { } name2 && name2.Length > 0 ? name2 :
+            Const.EnvNameShared;
+
         _Path = args.Path;
         _DotEnvFile = args.DotEnvFile;
         _SettingsFile = args.SettingsFile;

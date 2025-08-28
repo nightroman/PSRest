@@ -1,0 +1,7 @@
+﻿
+{
+  "version": "{{version}}",
+  "user": "{{$dotenv user}}",
+  "oops": "{{missing}}",
+  "age": {{var2}}
+}

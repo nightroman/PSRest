@@ -1,3 +1,7 @@
+<#
+.Synopsis
+	Assorted tests.
+#>
 
 Set-StrictMode -Version 3
 Import-Module PSRest
