@@ -25,7 +25,8 @@ Install-Module PSRest
     - [x] Support file variables
     - [x] Support GraphQL variables
     - [x] Support GraphQL and content files
-    - [ ] Support GraphQL selected operations
+    - [x] Support GraphQL selected operations
+    - [ ] Make XML response formatting indented
 
 ## See also
 

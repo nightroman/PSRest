@@ -1,6 +1,11 @@
 <#
 .Synopsis
 	Build script, https://github.com/nightroman/Invoke-Build
+
+.Description
+	Release:
+		ib uninstall, ., unit, test
+		ib pushPSGallery
 #>
 
 param(
@@ -9,8 +14,8 @@ param(
 	[string]$TargetFramework = (property TargetFramework net8.0)
 )
 
-$ProgressPreference = 0
 Set-StrictMode -Version 3
+$ProgressPreference = 0
 $ModuleName = 'PSRest'
 $ModuleRoot = "$env:ProgramFiles\PowerShell\Modules\$ModuleName"
 

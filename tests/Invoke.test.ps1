@@ -65,14 +65,15 @@ task Continents-1 {
 task Continents-1-local {
 	Set-RestEnvironment local http
 	($r = Invoke-RestHttp http/Continents-1.http)
-	$r = ConvertFrom-Json $r
+	$r = ConvertFrom-Json $r -AsHashtable
 
 	$h = $r.Headers
-	equals $h."User-Agent" "admin"
+	equals ($h['User-Agent']) admin
 
 	$d = $r.Data
 	assert ($d.query -match '(?s)^query Continents.*}$')
-	equals $d.variables $null
+	assert (!$d.Contains('variables'))
+	assert (!$d.Contains('operationName'))
 }
 
 task Continents-2 {
@@ -91,4 +92,44 @@ task Continents-2-local {
 	$d = $r.Data
 	assert ($d.query -match '(?s)^query Continents.*}$')
 	equals $d.variables.filter.code.regex A
+}
+
+task Continents-3 {
+	Set-RestEnvironment '' http
+	($r = Invoke-RestHttp http/Continents-3.graphql.http)
+	$r = ConvertFrom-Json $r
+
+	equals 5 $r.Data.continents.Count
+}
+
+task Continents-3-local {
+	Set-RestEnvironment local http
+	($r = Invoke-RestHttp http/Continents-3.graphql.http)
+	$r = ConvertFrom-Json $r -AsHashtable
+
+	# X-* headers are removed
+	$h = $r.Headers
+	equals ($h.Keys -join '|') 'Content-Length|Host|Content-Type'
+
+	# yes `query` // no `variables`, `operationName`
+	$d = $r.Data
+	assert ($d.query -match '(?s)^query Continents.*}$')
+	assert (!$d.Contains('variables'))
+	assert (!$d.Contains('operationName'))
+}
+
+task Continents-4 {
+	($r = Invoke-RestHttp http/Continents-4.graphql.http)
+	$r = ConvertFrom-Json $r -AsHashtable
+
+	# X-* headers are removed
+	$h = $r.Headers
+	equals ($h.Keys -join '|') 'Content-Length|Host|Content-Type'
+
+	# yes `query`, `variables`, `operationName`
+	$d = $r.Data
+	assert ($d.query -match '(?s)^query Continents.*}$')
+	equals $d.variables.regex1 A
+	equals $d.variables.regex2 N
+	equals $d.operationName Continents2
 }

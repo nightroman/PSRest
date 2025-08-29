@@ -3,6 +3,7 @@ bin/
 obj/
 Properties/
 TestResults/
+/*.html
 z
 z.*
 Directory.Build.props

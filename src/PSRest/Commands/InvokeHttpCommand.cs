@@ -39,21 +39,23 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return expand ? _environment.ExpandVariables(body, _variables) : body;
     }
 
-    string BodyToGraphQL(string body)
+    string BodyToGraphQL(string body, string? expOperationName)
     {
         string[] parts = Regexes.EmptyLine().Split(body, 2);
 
+        // query
         var query = BodyToContent(parts[0]);
+        var dto = new Dictionary<string, object?>(3) { { "query", query } };
 
-        object? variables = null;
+        // variables
         if (parts.Length > 1)
-            variables = JsonSerializer.Deserialize<object>(parts[1]);
+            dto.Add("variables", JsonSerializer.Deserialize<object>(parts[1]));
 
-        return JsonSerializer.Serialize(new
-        {
-            query,
-            variables
-        });
+        // operationName
+        if (expOperationName is { })
+            dto.Add("operationName", expOperationName);
+
+        return JsonSerializer.Serialize(dto);
     }
 
     protected override void BeginProcessing()
@@ -110,7 +112,14 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             if (expBody is null)
                 throw new FormatException("GraphQL request should have body.");
 
-            expBody = BodyToGraphQL(expBody);
+            string? expOperationName = null;
+            if (request.Headers.TryGetValue(Const.XGraphQLOperation, out var operationName))
+            {
+                expOperationName = _environment.ExpandVariables(operationName, _variables);
+                request.Headers.Remove(Const.XGraphQLOperation);
+            }
+
+            expBody = BodyToGraphQL(expBody, expOperationName);
         }
         else if (expBody is { })
         {

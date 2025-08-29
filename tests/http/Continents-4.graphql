@@ -1,0 +1,14 @@
+
+query Continents1($regex1: String!) {
+  continents(filter: {code: {regex: $regex1}}) {
+    code
+    name
+  }
+}
+
+query Continents2($regex2: String!) {
+  continents(filter: {code: {regex: $regex2}}) {
+    code
+    name
+  }
+}

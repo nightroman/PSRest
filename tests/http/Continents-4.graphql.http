@@ -1,0 +1,13 @@
+# Invoke-RestHttp // GraphQL with selected operation name
+
+POST http://127.0.0.1:55000/show
+Content-Type: application/json
+X-Request-Type: GraphQL
+X-GraphQL-Operation: Continents2
+
+< Continents-4.graphql
+
+{
+  "regex1": "A",
+  "regex2": "N"
+}

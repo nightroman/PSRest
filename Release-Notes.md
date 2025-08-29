@@ -1,5 +1,10 @@
 # PSRest Release Notes
 
+## v0.4.0
+
+Support GraphQL operation name header `X-GraphQL-Operation: {operationName}`.
+NOTE Not supported by REST Client.
+
 ## v0.3.0
 
 Support GraphQL and content files: `< {file}` (literal), `<@ {file}` (expanded variables).
