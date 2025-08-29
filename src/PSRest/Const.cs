@@ -13,6 +13,7 @@ static class Const
     public const string EnvVarDefault = "REST_ENV";
 
     public const string MediaTypeJson = "application/json";
+    public const string MediaTypeXml = "application/xml";
 
     public const string VarTypeShared = "$shared";
     public const string VarTypeDotEnv = "$dotenv";

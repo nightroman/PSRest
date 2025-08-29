@@ -1,4 +1,4 @@
-﻿
+
 {
   "version": "{{version}}",
   "user": "{{$dotenv user}}",

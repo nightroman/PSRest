@@ -109,7 +109,7 @@ task Continents-3-local {
 
 	# X-* headers are removed
 	$h = $r.Headers
-	equals ($h.Keys -join '|') 'Content-Length|Host|Content-Type'
+	equals (($h.Keys | Sort-Object) -join '|') 'Content-Length|Content-Type|Host'
 
 	# yes `query` // no `variables`, `operationName`
 	$d = $r.Data
@@ -124,7 +124,7 @@ task Continents-4 {
 
 	# X-* headers are removed
 	$h = $r.Headers
-	equals ($h.Keys -join '|') 'Content-Length|Host|Content-Type'
+	equals (($h.Keys | Sort-Object) -join '|') 'Content-Length|Content-Type|Host'
 
 	# yes `query`, `variables`, `operationName`
 	$d = $r.Data

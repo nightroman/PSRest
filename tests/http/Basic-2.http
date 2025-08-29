@@ -6,7 +6,7 @@
 @var1 = 42
 
 POST http://127.0.0.1:55000/show?param1={{var2}}
-content-type: application/json
+Content-Type: application/json
 age: {{var2}}
 
 {

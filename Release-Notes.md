@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.4.1
+
+Format some XML responses.
+
 ## v0.4.0
 
 Support GraphQL operation name header `X-GraphQL-Operation: {operationName}`.\

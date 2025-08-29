@@ -19,14 +19,19 @@ Install-Module PSRest
 
 ## Roadmap
 
-- [x] Environments and variables `{{var}}`, `{{$shared var}}`, `{{$dotenv var}}`, `{{$processEnv var}}`
+- [x] Environments and file, environment, system variables
+    - `{{variableName}}` and `{{$shared variableName}}`
+    - `{{$processEnv [%]envVarName}}`
+    - `{{$dotenv [%]variableName}}`
 - [ ] Parse and invoke REST Client files `.http`, `.rest`
     - [x] Add `Invoke-RestHttp`
     - [x] Support file variables
     - [x] Support GraphQL variables
     - [x] Support GraphQL and content files
     - [x] Support GraphQL selected operations
-    - [ ] Make XML response formatting indented
+    - [x] Format some XML responses
+    - [ ] Add more system variables
+    - [ ] Support prompt variables
 
 ## See also
 

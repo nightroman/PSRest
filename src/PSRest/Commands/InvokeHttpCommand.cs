@@ -4,6 +4,7 @@ using System.Management.Automation;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Xml;
 using IOPath = System.IO.Path;
 
 namespace PSRest.Commands;
@@ -29,11 +30,12 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 
     string BodyToContent(string body)
     {
-        if (!body.StartsWith('<'))
+        //! mind xml
+        if (!body.StartsWith("< ") && !body.StartsWith("<@ "))
             return body;
 
         bool expand = body.StartsWith("<@");
-        var path = IOPath.Combine(_location, body[(expand ? 2 : 1)..].Trim());
+        var path = IOPath.Combine(_location, body[(expand ? 3 : 2)..].Trim());
 
         body = File.ReadAllText(path).Trim();
         return expand ? _environment.ExpandVariables(body, _variables) : body;
@@ -56,6 +58,27 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             dto.Add("operationName", expOperationName);
 
         return JsonSerializer.Serialize(dto);
+    }
+
+    static string FormatXml(string xml)
+    {
+        var doc = new XmlDocument();
+        doc.LoadXml(xml);
+
+        var settings = new XmlWriterSettings
+        {
+            Indent = true,
+            IndentChars = "  ",
+            NewLineChars = "\n",
+            NewLineHandling = NewLineHandling.Replace,
+            OmitXmlDeclaration = true,
+        };
+
+        using var sw = new StringWriter();
+        using var writer = XmlWriter.Create(sw, settings);
+        doc.Save(writer);
+
+        return sw.ToString();
     }
 
     protected override void BeginProcessing()
@@ -164,6 +187,17 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             catch (Exception ex)
             {
                 WriteWarning($"Formatting JSON: {ex.Message}");
+            }
+        }
+        else if (response.Content.Headers.ContentType?.MediaType?.Contains(Const.MediaTypeXml, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            try
+            {
+                contentString = FormatXml(contentString);
+            }
+            catch (Exception ex)
+            {
+                WriteWarning($"Formatting XML: {ex.Message}");
             }
         }
 
