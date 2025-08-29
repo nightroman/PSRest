@@ -2,8 +2,8 @@
 
 ## v0.4.0
 
-Support GraphQL operation name header `X-GraphQL-Operation: {operationName}`.
-NOTE Not supported by REST Client.
+Support GraphQL operation name header `X-GraphQL-Operation: {operationName}`.\
+REST Client feature request: https://github.com/Huachao/vscode-restclient/issues/1393
 
 ## v0.3.0
 
