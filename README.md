@@ -23,6 +23,11 @@ Install-Module PSRest
     - `{{variableName}}` and `{{$shared variableName}}`
     - `{{$processEnv [%]envVarName}}`
     - `{{$dotenv [%]variableName}}`
+    - `{{$guid}}`
+    - `{{$randomInt min max}}`
+    - `{{$timestamp [offset option]}}`
+    - `{{$datetime rfc1123|iso8601 [offset option]}}`
+    - `{{$localDatetime rfc1123|iso8601 [offset option]}}`
 - [ ] Parse and invoke REST Client files `.http`, `.rest`
     - [x] Add `Invoke-RestHttp`
     - [x] Support file variables
@@ -30,7 +35,6 @@ Install-Module PSRest
     - [x] Support GraphQL and content files
     - [x] Support GraphQL selected operations
     - [x] Format some XML responses
-    - [ ] Add more system variables
     - [ ] Support prompt variables
 
 ## See also

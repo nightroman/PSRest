@@ -1,7 +1,7 @@
-﻿
-using DotNetEnv;
+﻿using DotNetEnv;
 using DotNetEnv.Extensions;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace PSRest;
 
@@ -36,10 +36,17 @@ public class RestEnvironment
 
     public string? GetVariable(string name, VariableType type, Dictionary<string, string>? vars = null)
     {
+        if ((name = name.Trim()).Length == 0)
+            return "{{}}";
+
         if (type == VariableType.Any)
         {
             if (name.StartsWith('$'))
             {
+                var system = GetSystemVariable(name);
+                if (system is { })
+                    return system;
+
                 var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 type = parts[0] switch
@@ -74,8 +81,48 @@ public class RestEnvironment
             VariableType.Shared => GetEnvVariable(name, true),
             VariableType.DotEnv => GetDotEnvVariable(name),
             VariableType.ProcessEnv => GetProcessEnvVariable(name),
-            _ => throw new NotSupportedException(),
+            _ => throw new NotSupportedException()
         };
+    }
+
+    public static string? GetSystemVariable(string name)
+    {
+        if (name == Const.SystemGuid)
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        if (name.StartsWith(Const.SystemRandomInt))
+        {
+            var span = name.AsSpan(Const.SystemRandomInt.Length).Trim();
+            int index = span.IndexOf(' ');
+            if (index < 0 || !int.TryParse(span[0..index], out int min) || !int.TryParse(span[(index + 1)..], out int max))
+                throw new FormatException($"Parsing '{name}': expected '{Const.SystemRandomInt} min max'.");
+
+            return Random.Shared.Next(min, max).ToString();
+        }
+
+        if (name.StartsWith(Const.SystemTimestamp))
+        {
+            if (name == Const.SystemTimestamp)
+                return DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+
+            var offset = TextKit.ParseOffset(name, name.AsSpan(Const.SystemTimestamp.Length));
+            var timestamp = DateTimeOffset.UtcNow + offset;
+            return timestamp.ToUnixTimeSeconds().ToString();
+        }
+
+        if (name.StartsWith(Const.SystemDatetime))
+        {
+            return TextKit.ParseDatetime(name, Const.SystemDatetime, DateTime.UtcNow);
+        }
+
+        if (name.StartsWith(Const.SystemLocalDatetime))
+        {
+            return TextKit.ParseDatetime(name, Const.SystemLocalDatetime, DateTime.Now);
+        }
+
+        return null;
     }
 
     public static string? GetProcessEnvVariable(string name)
@@ -90,7 +137,7 @@ public class RestEnvironment
             var path = _DotEnvFile ?? Path.Join(_Path, Const.DotEnvFile);
             try
             {
-                _dataDotEnv = Env.NoEnvVars().Load(path).ToDotEnvDictionary(CreateDictionaryOption.TakeFirst);
+                _dataDotEnv = Env.NoEnvVars().Load(path).ToDotEnvDictionary(CreateDictionaryOption.TakeLast);
             }
             catch (Exception ex)
             {

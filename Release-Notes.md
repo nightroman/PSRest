@@ -1,5 +1,16 @@
 # PSRest Release Notes
 
+## v0.4.2
+
+Add system variables:
+- `{{$guid}}`
+- `{{$randomInt min max}}`
+- `{{$timestamp [offset option]}}`
+- `{{$datetime rfc1123|iso8601 [offset option]}}`
+- `{{$localDatetime rfc1123|iso8601 [offset option]}}`
+
+Fix `$dotenv` duplicates: take last.
+
 ## v0.4.1
 
 Format some XML responses.

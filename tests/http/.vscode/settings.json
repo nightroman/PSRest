@@ -19,5 +19,6 @@
       "token": "{{$shared prodToken}}",
       "secretKey": "prodSecret"
     }
-  }
+  },
+  "rest-client.previewOption": "exchange"
 }

@@ -10,8 +10,22 @@ Content-Type: application/json
 age: {{var2}}
 
 {
-  "version": "{{version}}",
-  "user": "{{$dotenv user}}",
+  "version": "{{  version  }}",
+  "user": "{{  $dotenv user  }}",
+  "empty": "{{  }}",
+  "randomInt": "{{  $randomInt 0 2  }}",
+  "timestamp1": "{{  $timestamp  }}",
+  "timestamp2": "{{  $timestamp 1 s  }}",
+  "datetimeIso1": "{{  $datetime iso8601  }}",
+  "datetimeIso2": "{{  $datetime iso8601 1 s }}",
+  "datetimeIso3": "{{  $localDatetime iso8601  }}",
+  "datetimeRfc1": "{{  $datetime rfc1123  }}",
+  "datetimeRfc2": "{{  $datetime rfc1123 1 s }}",
   "oops": "{{missing}}",
   "age": {{var2}}
 }
+
+### Variable spaces
+# outer spaces are trimmed
+# PSRest: inner spaces may be single or multiple
+# VSCode: some inner spaces must be single, some not

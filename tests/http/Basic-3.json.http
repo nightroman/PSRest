@@ -1,12 +1,9 @@
 ﻿# Invoke-RestHttp // HTTP // file with expanded variables
 
-// file variables // using later vars is fine
-@var2 = {{var1}}
-@var1 = 11
-@var1 = 42
+@age = 42
 
-POST http://127.0.0.1:55000/show?param1={{var2}}
+POST http://127.0.0.1:55000/show?param1={{age}}
 Content-Type: application/json
-age: {{var2}}
+age: {{age}}
 
 <@ Basic-3.json
