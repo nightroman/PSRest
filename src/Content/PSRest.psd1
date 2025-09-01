@@ -19,6 +19,7 @@
 		'Set-RestEnvironment'
 		'Get-RestVariable'
 		'Resolve-RestVariable'
+		'Import-RestDotEnv'
 	)
 
 	PrivateData = @{

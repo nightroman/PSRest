@@ -1,24 +1,29 @@
 <#
 .Synopsis
-	Assorted tests.
+	Common tests about commands.
 #>
 
 Set-StrictMode -Version 3
 Import-Module PSRest
 
-task export {
-	$data = Import-PowerShellDataFile ..\src\Content\PSRest.psd1
-	$cmdlets = (Get-Command -Module PSRest -CommandType Cmdlet).ForEach('Name')
-	foreach($$ in $data.CmdletsToExport) {
-		assert ($$ -in $cmdlets) "Exported cmdlet '$$' is missing."
+task exported_command_exists {
+	$commands = (Get-Command -Module PSRest).ForEach('Name')
+	$exported = @(
+		$data = Import-PowerShellDataFile ..\src\Content\PSRest.psd1
+		$data.AliasesToExport
+		$data.CmdletsToExport
+		$data.FunctionsToExport
+	)
+	foreach($_ in $exported) {
+		assert ($_ -in $commands) "Missing exported command: '$_'."
 	}
 }
 
-task help {
-	foreach($cmd in Get-Command -Module PSRest) {
-		$r = Get-Help $cmd
-		if (!$r.Synopsis.EndsWith('.')) {
-			Write-Warning "$($cmd.CommandType) '$cmd': missing synopsis or its period."
+task command_help_synopsis {
+	$commands = Get-Command -Module PSRest
+	foreach($_ in $commands) {
+		if (!(Get-Help $_).Synopsis.EndsWith('.')) {
+			Write-Warning "$($_.CommandType) '$_': Missing synopsis or its period."
 		}
 	}
 }

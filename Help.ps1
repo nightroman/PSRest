@@ -120,3 +120,41 @@ $Environment = @'
 		Environment = $Environment
 	}
 }
+
+### Import-RestDotEnv
+@{
+	command = 'Import-RestDotEnv'
+	synopsis = 'Imports variables from ".env".'
+	description = @'
+	It imports variables from the specified or default ".env" file and applies
+	them to the current process environment, unless As* is used. In that case
+	the process environment is not changed and variables are returned.
+'@
+	parameters = @{
+		Path = @'
+		Specifies the existing file to import.
+
+		The default file, omitted or empty, is ".env" in the current location
+		or the first found in parents. If the file is not found, no variables
+		are imported.
+'@
+		AsDictionary = @'
+		Tells to get variables as `[Dictionary[string, string]]`, case sensitive.
+		Duplicates are processed as `TakeLast`.
+'@
+		AsKeyValue = @'
+		Tells to get variables as `[KeyValuePair[string, string]]`, including
+		duplicates.
+'@
+	}
+	outputs = @(
+		@{
+			type = 'System.Collections.Generic.Dictionary[System.String, System.String]'
+			description = 'when -AsDictionary'
+		}
+		@{
+			type = 'System.Collections.Generic.KeyValuePair[System.String, System.String]'
+			description = 'when -AsKeyValue'
+		}
+	)
+}

@@ -5,12 +5,13 @@ SHORT DESCRIPTION
     VSCode REST Client features in PowerShell.
 
 LONG DESCRIPTION
-    The module provides the following commands:
+    Available commands:
 
         Invoke-RestHttp
         Set-RestEnvironment
         Get-RestVariable
         Resolve-RestVariable
+        Import-RestDotEnv
 
 SEE ALSO
     PSRest https://github.com/nightroman/PSRest

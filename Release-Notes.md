@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.5.0
+
+New cmdlet `Import-RestDotEnv`.
+
 ## v0.4.2
 
 Add system variables:

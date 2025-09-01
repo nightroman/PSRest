@@ -16,18 +16,27 @@ Install-Module PSRest
 - `Set-RestEnvironment`
 - `Get-RestVariable`
 - `Resolve-RestVariable`
+- `Import-RestDotEnv`
+
+## Variables
+
+Environment and file (user defined)
+
+- `{{variableName}}` and `{{$shared variableName}}`
+- `{{$processEnv [%]envVarName}}`
+- `{{$dotenv [%]variableName}}`
+
+ System (dynamic)
+
+- `{{$guid}}`
+- `{{$randomInt min max}}`
+- `{{$timestamp [offset option]}}`
+- `{{$datetime rfc1123|iso8601 [offset option]}}`
+- `{{$localDatetime rfc1123|iso8601 [offset option]}}`
 
 ## Roadmap
 
 - [x] Environments and file, environment, system variables
-    - `{{variableName}}` and `{{$shared variableName}}`
-    - `{{$processEnv [%]envVarName}}`
-    - `{{$dotenv [%]variableName}}`
-    - `{{$guid}}`
-    - `{{$randomInt min max}}`
-    - `{{$timestamp [offset option]}}`
-    - `{{$datetime rfc1123|iso8601 [offset option]}}`
-    - `{{$localDatetime rfc1123|iso8601 [offset option]}}`
 - [ ] Parse and invoke REST Client files `.http`, `.rest`
     - [x] Add `Invoke-RestHttp`
     - [x] Support file variables
