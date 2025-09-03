@@ -9,6 +9,8 @@
 
 Set-StrictMode -Version 3
 Import-Module PSRest
+Import-Module ./zoo
+Start-Server
 
 task invokeText {
 	$r = Invoke-RestHttp -Text 'GET https://example.com'
@@ -52,6 +54,13 @@ task Basic-3 {
 	equals $d.user "admin"
 	equals $d.oops "{{missing}}"
 	equals $d.age 42L
+}
+
+task Basic-4 {
+	($r = (Invoke-RestHttp http/Basic-4.http) -split '\r?\n')
+
+	equals $r[0] '<request>'
+	equals $r[1] '  <version>v1</version>' #! indent
 }
 
 task Continents-1 {
