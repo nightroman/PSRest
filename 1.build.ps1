@@ -24,7 +24,7 @@ $ProjectUrl = "https://github.com/nightroman/$ModuleName"
 $Copyright = 'Copyright (c) 2025 Roman Kuzmin'
 
 task clean {
-	remove README.html, *.nupkg, z, src\*\bin, src\*\obj
+	remove README.html, *.nupkg, z, src\*\bin, src\*\obj, TestResults
 }
 
 task build meta, {
@@ -67,7 +67,7 @@ task markdown {
 	)}
 }
 
-task meta -Inputs .build.ps1, Release-Notes.md -Outputs src\Directory.Build.props -Jobs version, {
+task meta -Inputs 1.build.ps1, Release-Notes.md -Outputs src\Directory.Build.props -Jobs version, {
 	Set-Content src\Directory.Build.props @"
 <Project>
   <PropertyGroup>

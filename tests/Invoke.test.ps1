@@ -40,8 +40,10 @@ task Basic-2 {
 }
 
 task Basic-3 {
-	$r = Invoke-RestHttp http/Basic-3.json.http
+	$r = Invoke-RestHttp http/Basic-3.json.http -HeadersVariable Headers
 	$r = ConvertFrom-Json $r
+
+	assert ('application/json' -eq $Headers.ContentType)
 
 	$h = $r.Headers
 	equals $h.Age "42"
@@ -57,7 +59,9 @@ task Basic-3 {
 }
 
 task Basic-4 {
-	($r = (Invoke-RestHttp http/Basic-4.http) -split '\r?\n')
+	($r = (Invoke-RestHttp http/Basic-4.http -HeadersVariable Headers) -split '\r?\n')
+
+	assert ('application/xml' -eq $Headers.ContentType)
 
 	equals $r[0] '<request>'
 	equals $r[1] '  <version>v1</version>' #! indent

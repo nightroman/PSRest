@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.5.1
+
+`Invoke-RestHttp` - new parameter `HeadersVariable`.
+
 ## v0.5.0
 
 New cmdlet `Import-RestDotEnv`.

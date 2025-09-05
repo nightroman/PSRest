@@ -1,5 +1,4 @@
-﻿
-using Sprache;
+﻿using Sprache;
 using System.Management.Automation;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -21,6 +20,9 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 
     [Parameter(Mandatory = true, ParameterSetName = PsnText)]
     public string? Text { get; set; }
+
+    [Parameter]
+    public string? HeadersVariable { get; set; }
 
     static readonly JsonSerializerOptions s_JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true };
 
@@ -169,11 +171,17 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             message.Content = new StringContent(expBody, Encoding.UTF8, Const.MediaTypeJson);
 
         // HTTP client, send
+        WriteProgress(new(1, Const.MyName, "Sending HTTP request..."));
         var client = new HttpClient();
         HttpResponseMessage response = client.Send(message);
+        WriteProgress(new(0, Const.MyName, "Done"));
 
+        // variables
+        if (HeadersVariable is { })
+            SessionState.PSVariable.Set(new(HeadersVariable, response.Content.Headers));
+
+        // content
         var contentString = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
         if (!response.IsSuccessStatusCode)
             throw new InvalidOperationException(contentString);
 

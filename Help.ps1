@@ -28,6 +28,10 @@ $Environment = @'
 		Path = 'The HTTP file.'
 		Text = 'The HTTP text.'
 		Environment = $Environment
+		HeadersVariable = @'
+		The response content headers variable name.
+		[System.Net.Http.Headers.HttpContentHeaders]
+'@
 	}
 }
 

@@ -2,6 +2,8 @@
 
 static class Const
 {
+    public const string MyName = "PSRest";
+
     public const string DotEnvFile = ".env";
     public const string SettingsFile = "settings.json";
     public const string SettingsKeyRoot = "rest-client.environmentVariables";
