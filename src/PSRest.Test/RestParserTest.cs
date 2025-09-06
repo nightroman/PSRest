@@ -1,5 +1,4 @@
-﻿
-using Sprache;
+﻿using Sprache;
 using Xunit;
 
 namespace PSRest.Test;
@@ -105,9 +104,9 @@ public class RestParserTest
 
         var request = res.Value;
         Assert.Equal(count, request.Headers.Count);
-        if (request.Version != default)
+        if (request.Line.Version != default)
         {
-            Assert.Equal(version, request.Version.ToString());
+            Assert.Equal(version, request.Line.Version.ToString());
         }
         if (isBody)
         {

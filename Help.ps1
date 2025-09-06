@@ -32,6 +32,15 @@ $Environment = @'
 		The response content headers variable name.
 		[System.Net.Http.Headers.HttpContentHeaders]
 '@
+		Tag = @'
+		The HTTP source separator comment text or line number.
+		Default: $env:REST_TAG
+
+		HTTP source may have several requests separated by comments like `### ...`.
+		In order to tag a request to invoke:
+		- for the separator `### Run Me`, use the string "Run Me"
+		- or specify any line number between separator comments
+'@
 	}
 }
 

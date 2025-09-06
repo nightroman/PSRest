@@ -1,5 +1,4 @@
-﻿
-using Sprache;
+﻿using Sprache;
 
 namespace PSRest;
 
@@ -56,12 +55,12 @@ public static class RestParser
         from version in Parse.CharExcept("\r\n").AtLeastOnce().Text().Token()
         select Catch(() => new Version(version), ex => throw new FormatException($"HTTP version '{version}': {ex.Message}", ex));
 
-    public static readonly Parser<(string, string, Version)> RequestLineParser =
+    public static readonly Parser<RestRequestLine> RequestLineParser =
         from method in MethodParser
         from ws in Parse.WhiteSpace.AtLeastOnce()
         from url in UrlParser
         from version in HttpVersionParser.Optional()
-        select (method, url, version.GetOrDefault());
+        select new RestRequestLine { Method = method, Url = url, Version = version.GetOrDefault() };
 
     public static readonly Parser<KeyValuePair<string, string>> HeaderParser =
         from key in Parse.Char(c => !char.IsWhiteSpace(c) && c != ':', "key").Many().Text().Token()
@@ -87,16 +86,14 @@ public static class RestParser
         from body in BodyParser.Optional()
         select new RestRequest(headers)
         {
-            Method = requestLine.Item1,
-            Url = requestLine.Item2,
-            Version = requestLine.Item3,
+            Line = requestLine,
             Body = body.GetOrDefault()
         };
 
     public static readonly Parser<IRestSyntax> AnyParser =
         WhiteSpaceParser
         .Or(RequestParser)
-        .Or(CommentParser)
+        .Or(CommentParser.Positioned())
         .Or(VariableParser)
         ;
 

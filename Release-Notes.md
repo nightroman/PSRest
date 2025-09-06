@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.5.2
+
+`Invoke-RestHttp` - new parameter `Tag`, to tag one request.
+
 ## v0.5.1
 
 `Invoke-RestHttp` - new parameter `HeadersVariable`.

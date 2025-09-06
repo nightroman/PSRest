@@ -67,6 +67,26 @@ task Basic-4 {
 	equals $r[1] '  <version>v1</version>' #! indent
 }
 
+task Basic-Tags {
+	$lines = [System.IO.File]::ReadAllLines("$PSScriptRoot/http/Basic-Tags.http")
+	$text = $lines -join "`n"
+	$n1 = 1 + [array]::IndexOf($lines, '###')
+	$n2 = 1 + [array]::IndexOf($lines, '### bar')
+
+	$env:REST_TAG = 'bar'
+	equals /test/3 (Invoke-RestHttp -Text $text)
+
+	$env:REST_TAG = ''
+	equals /test/1 (Invoke-RestHttp -Text $text)
+	equals /test/1 (Invoke-RestHttp -Text $text -Tag ($n1 - 1))
+
+	equals /test/2 (Invoke-RestHttp -Text $text -Tag $n1)
+	equals /test/2 (Invoke-RestHttp -Text $text -Tag ($n2 - 1))
+
+	equals /test/3 (Invoke-RestHttp -Text $text -Tag $n2)
+	equals /test/3 (Invoke-RestHttp -Text $text -Tag 12345)
+}
+
 task Continents-1 {
 	Set-RestEnvironment '' http
 	($r = Invoke-RestHttp http/Continents-1.http)

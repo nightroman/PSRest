@@ -24,6 +24,9 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
     [Parameter]
     public string? HeadersVariable { get; set; }
 
+    [Parameter]
+    public string? Tag { get; set; } = System.Environment.GetEnvironmentVariable(Const.EnvVarTag);
+
     static readonly JsonSerializerOptions s_JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true };
 
     string _location = null!;
@@ -83,6 +86,37 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return sw.ToString();
     }
 
+    RestRequest? FindRequest(IEnumerable<IRestSyntax> source)
+    {
+        if (!string.IsNullOrEmpty(Tag))
+        {
+            //! assume list
+            var list = (List<IRestSyntax>)source;
+
+            // find the comment ###, by line number or content
+            int iComment;
+            if (int.TryParse(Tag, out var lineNumber))
+            {
+                iComment = list.FindLastIndex(x => x is RestComment c && c.Start == "#" && c.Text.StartsWith("##") && c.Pos?.Line <= lineNumber);
+            }
+            else
+            {
+                iComment = list.FindLastIndex(x => x is RestComment c && c.Start == "#" && c.Text.StartsWith("##") && c.Text[2..].Trim() == Tag);
+            }
+
+            // take the first request after ###
+            if (iComment >= 0)
+            {
+                for (int i = iComment + 1; i < list.Count; i++)
+                {
+                    if (list[i] is RestRequest r)
+                        return r;
+                }
+            }
+        }
+        return source.OfType<RestRequest>().FirstOrDefault();
+    }
+
     protected override void BeginProcessing()
     {
         string text;
@@ -106,8 +140,9 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         if (!parsed.WasSuccessful)
             throw new FormatException($"Parsing '{Path}: {parsed.Message}");
 
-        var request = parsed.Value.FirstOrDefault(x => x is RestRequest) as RestRequest ??
-            throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
+        // select tagged request
+        var request = FindRequest(parsed.Value) ??
+                throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
 
         // get variables first, new override old, then expand
         _variables = [];
@@ -131,8 +166,8 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             //! as REST Client
             request.Headers.Remove(Const.XRequestType);
 
-            if (request.Method != "POST")
-                throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Method}'");
+            if (request.Line.Method != "POST")
+                throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Line.Method}'");
 
             if (expBody is null)
                 throw new FormatException("GraphQL request should have body.");
@@ -152,12 +187,12 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         }
 
         // HTTP request message with URL
-        var expUrl = _environment.ExpandVariables(request.Url, _variables);
-        var message = new HttpRequestMessage(HttpMethod.Parse(request.Method), expUrl);
+        var expUrl = _environment.ExpandVariables(request.Line.Url, _variables);
+        var message = new HttpRequestMessage(HttpMethod.Parse(request.Line.Method), expUrl);
 
         // HTTP version
-        if (request.Version != default)
-            message.Version = request.Version;
+        if (request.Line.Version != default)
+            message.Version = request.Line.Version;
 
         // HTTP headers
         foreach (var header in request.Headers)

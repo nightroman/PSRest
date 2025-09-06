@@ -5,6 +5,10 @@ Start-HttpRoutes http://127.0.0.1:55001 @{
 		$PID
 	}
 
+	'GET /test/*' = {
+		$Request.Url.AbsolutePath
+	}
+
 	'POST /show' = {
 		$Response.ContentType = 'application/json'
 		[ordered]@{
