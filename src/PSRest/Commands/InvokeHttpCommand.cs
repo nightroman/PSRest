@@ -86,12 +86,12 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return sw.ToString();
     }
 
-    RestRequest? FindRequest(IEnumerable<IRestSyntax> source)
+    RestRequest? FindRequest(IEnumerable<AnySyntax> source)
     {
         if (!string.IsNullOrEmpty(Tag))
         {
             //! assume list
-            var list = (List<IRestSyntax>)source;
+            var list = (List<AnySyntax>)source;
 
             // find the comment ###, by line number or content
             int iComment;
@@ -161,22 +161,25 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         var expBody = request.Body is null ? null : _environment.ExpandVariables(request.Body, _variables);
 
         // GraphQL or content body
-        if (request.Headers.TryGetValue(Const.XRequestType, out var requestType) && requestType.Equals("GraphQL", StringComparison.OrdinalIgnoreCase))
+        if (request.Headers.Find(x
+            => x.Key.Equals(Const.XRequestType, StringComparison.OrdinalIgnoreCase)
+            && x.Value.Equals("GraphQL", StringComparison.OrdinalIgnoreCase)) is { } headerRequestType)
         {
             //! as REST Client
-            request.Headers.Remove(Const.XRequestType);
+            request.Headers.Remove(headerRequestType);
 
-            if (request.Line.Method != "POST")
-                throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Line.Method}'");
+            if (request.Operation.Method != "POST")
+                throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Operation.Method}'");
 
             if (expBody is null)
                 throw new FormatException("GraphQL request should have body.");
 
             string? expOperationName = null;
-            if (request.Headers.TryGetValue(Const.XGraphQLOperation, out var operationName))
+            if (request.Headers.Find(x
+                => x.Key.Equals(Const.XGraphQLOperation, StringComparison.OrdinalIgnoreCase)) is { } headerGraphQLOperation)
             {
-                expOperationName = _environment.ExpandVariables(operationName, _variables);
-                request.Headers.Remove(Const.XGraphQLOperation);
+                request.Headers.Remove(headerGraphQLOperation);
+                expOperationName = _environment.ExpandVariables(headerGraphQLOperation.Value, _variables);
             }
 
             expBody = BodyToGraphQL(expBody, expOperationName);
@@ -187,12 +190,12 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         }
 
         // HTTP request message with URL
-        var expUrl = _environment.ExpandVariables(request.Line.Url, _variables);
-        var message = new HttpRequestMessage(HttpMethod.Parse(request.Line.Method), expUrl);
+        var expUrl = _environment.ExpandVariables(request.Operation.Url, _variables);
+        var message = new HttpRequestMessage(HttpMethod.Parse(request.Operation.Method), expUrl);
 
         // HTTP version
-        if (request.Line.Version != default)
-            message.Version = request.Line.Version;
+        if (request.Operation.Version != default)
+            message.Version = request.Operation.Version;
 
         // HTTP headers
         foreach (var header in request.Headers)

@@ -16,16 +16,20 @@ public static class RestParser
         }
     }
 
-    public static readonly Parser<IRestSyntax> WhiteSpaceParser =
-        from _ in Parse.WhiteSpace.AtLeastOnce()
-        select (IRestSyntax)null!;
+    public static readonly Parser<AnySyntax> WhiteSpaceParser =
+        from ws1 in Parse.WhiteSpace.AtLeastOnce()
+        select (AnySyntax)null!;
 
     public static readonly Parser<RestComment> CommentParser =
-        from leading in Parse.WhiteSpace.Many()
+        from ws1 in Parse.WhiteSpace.Many()
         from start in Parse.String("#").Or(Parse.String("//")).Text()
         from text in Parse.CharExcept("\r\n").Many().Text()
         from _ in Parse.LineTerminator
-        select new RestComment { Start = start, Text = text };
+        select new RestComment
+        {
+            Start = start,
+            Text = text
+        };
 
     public static readonly Parser<RestVariable> VariableParser =
         from at in Parse.Char('@')
@@ -33,7 +37,11 @@ public static class RestParser
         from eq in Parse.Char('=').Token()
         from value in Parse.CharExcept("\r\n").Many().Text()
         from _ in Parse.LineTerminator
-        select new RestVariable { Name = name, Value = value };
+        select new RestVariable
+        {
+            Name = name,
+            Value = value
+        };
 
     public static readonly Parser<string> MethodParser =
         Parse.String("GET")
@@ -55,19 +63,28 @@ public static class RestParser
         from version in Parse.CharExcept("\r\n").AtLeastOnce().Text().Token()
         select Catch(() => new Version(version), ex => throw new FormatException($"HTTP version '{version}': {ex.Message}", ex));
 
-    public static readonly Parser<RestRequestLine> RequestLineParser =
+    public static readonly Parser<RestOperation> OperationParser =
         from method in MethodParser
-        from ws in Parse.WhiteSpace.AtLeastOnce()
+        from ws1 in Parse.WhiteSpace.AtLeastOnce()
         from url in UrlParser
         from version in HttpVersionParser.Optional()
-        select new RestRequestLine { Method = method, Url = url, Version = version.GetOrDefault() };
+        select new RestOperation
+        {
+            Method = method,
+            Url = url,
+            Version = version.GetOrDefault()
+        };
 
-    public static readonly Parser<KeyValuePair<string, string>> HeaderParser =
+    public static readonly Parser<RestHeader> HeaderParser =
         from key in Parse.Char(c => !char.IsWhiteSpace(c) && c != ':', "key").Many().Text().Token()
         from colon in Parse.Char(':')
         from value in Parse.CharExcept("\r\n").Many().Text()
         from _ in Parse.LineTerminator
-        select new KeyValuePair<string, string>(key, value.Trim());
+        select new RestHeader
+        {
+            Key = key,
+            Value = value.Trim()
+        };
 
     public static readonly Parser<string> BodyLineParser =
         from next in Parse.Not(Parse.String("###"))
@@ -81,22 +98,23 @@ public static class RestParser
         select string.Join('\n', lines);
 
     public static readonly Parser<RestRequest> RequestParser =
-        from requestLine in RequestLineParser
+        from operation in OperationParser
         from headers in HeaderParser.Many()
         from body in BodyParser.Optional()
-        select new RestRequest(headers)
+        select new RestRequest
         {
-            Line = requestLine,
+            Operation = operation,
+            Headers = [.. headers],
             Body = body.GetOrDefault()
         };
 
-    public static readonly Parser<IRestSyntax> AnyParser =
+    public static readonly Parser<AnySyntax> AnyParser =
         WhiteSpaceParser
         .Or(RequestParser)
         .Or(CommentParser.Positioned())
         .Or(VariableParser)
         ;
 
-    public static readonly Parser<IEnumerable<IRestSyntax>> Parser =
+    public static readonly Parser<IEnumerable<AnySyntax>> Parser =
         AnyParser.Many();
 }

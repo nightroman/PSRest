@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.5.3
+
+Refactoring, minor tweaks.
+
 ## v0.5.2
 
 `Invoke-RestHttp` - new parameter `Tag`, to tag one request.

@@ -1,5 +1,4 @@
-﻿
-namespace PSRest;
+﻿namespace PSRest;
 
 public enum VariableType
 {

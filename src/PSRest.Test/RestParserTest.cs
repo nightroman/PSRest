@@ -104,9 +104,9 @@ public class RestParserTest
 
         var request = res.Value;
         Assert.Equal(count, request.Headers.Count);
-        if (request.Line.Version != default)
+        if (request.Operation.Version != default)
         {
-            Assert.Equal(version, request.Line.Version.ToString());
+            Assert.Equal(version, request.Operation.Version.ToString());
         }
         if (isBody)
         {

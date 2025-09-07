@@ -1,7 +1,6 @@
 ﻿using DotNetEnv;
 using DotNetEnv.Extensions;
 using System.Text.Json;
-using System.Xml.Linq;
 
 namespace PSRest;
 
