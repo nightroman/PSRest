@@ -87,6 +87,34 @@ task Basic-Tags {
 	equals /test/3 (Invoke-RestHttp -Text $text -Tag 12345)
 }
 
+task Basic-Prompt {
+	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Prompt.http")
+
+	Set-Alias Read-Host Read-Host2
+	function Read-Host2($Prompt, [switch]$MaskInput) {
+		$log.Prompt = $Prompt
+		$log.MaskInput = $MaskInput
+		"input-$Prompt"
+	}
+
+	$log = @{}
+	$r = Invoke-RestHttp -Text $text
+	equals $r /test/1
+	equals $log.Count 0
+
+	$log = @{}
+	$r = Invoke-RestHttp -Text $text -Tag bar
+	equals $r /test/2/input-bar
+	equals $log.Prompt bar
+	equals $log.MaskInput $false
+
+	$log = @{}
+	$r = Invoke-RestHttp -Text $text -Tag pass
+	equals $r /test/3/input-Password
+	equals $log.Prompt Password
+	equals $log.MaskInput $true
+}
+
 task Continents-1 {
 	Set-RestEnvironment '' http
 	($r = Invoke-RestHttp http/Continents-1.http)

@@ -26,13 +26,18 @@ Environment and file (user defined)
 - `{{$processEnv [%]envVarName}}`
 - `{{$dotenv [%]variableName}}`
 
- System (dynamic)
+System (dynamic)
 
 - `{{$guid}}`
 - `{{$randomInt min max}}`
 - `{{$timestamp [offset option]}}`
 - `{{$datetime rfc1123|iso8601 [offset option]}}`
 - `{{$localDatetime rfc1123|iso8601 [offset option]}}`
+
+Prompt (input)
+
+- `# @prompt var [prompt]`
+- `// @prompt var [prompt]`
 
 ## Roadmap
 
@@ -44,7 +49,8 @@ Environment and file (user defined)
     - [x] Support GraphQL and content files
     - [x] Support GraphQL selected operations
     - [x] Format some XML responses
-    - [ ] Support prompt variables
+    - [x] Support prompt variables
+    - [ ] Support request variables
 
 ## See also
 

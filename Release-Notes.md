@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.5.4
+
+Support prompt variables.
+
 ## v0.5.3
 
 Refactoring, minor tweaks.

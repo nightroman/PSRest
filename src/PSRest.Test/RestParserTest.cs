@@ -9,6 +9,8 @@ public class RestParserTest
     [InlineData("### bar", "## bar")]
     [InlineData("/// bar", "/ bar")]
     [InlineData("# bar\r\n", " bar")]
+    [InlineData("#  @prompt  bar  ", "")]
+    [InlineData("#  @prompt  bar  description  ", "description  ")]
     public void Comment(string input, string expected)
     {
         var res = RestParser.CommentParser.TryParse(input);
@@ -55,9 +57,22 @@ public class RestParserTest
         }
         """;
 
+    const string Http3 = """
+        GET http://127.0.0.1:55001/test/1
+
+        ###
+        # @prompt bar1
+        GET http://127.0.0.1:55001/test/2/{{bar1}}
+
+        ### bar
+        // @prompt bar2 some stuff
+        GET http://127.0.0.1:55001/test/3/{{bar2}
+        """;
+
     [Theory]
     [InlineData(Http1, 9, 2)]
     [InlineData(Http2, 4, 1)]
+    [InlineData(Http3, 7, 3)]
     public void Http(string input, int nAll, int nRequest)
     {
         var res = RestParser.Parser.TryParse(input);

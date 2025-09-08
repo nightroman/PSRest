@@ -20,15 +20,23 @@ public static class RestParser
         from ws1 in Parse.WhiteSpace.AtLeastOnce()
         select (AnySyntax)null!;
 
+    public static readonly Parser<string> PromptParser =
+        from prompt in Parse.String("@prompt").Token()
+        from name in Parse.LetterOrDigit.AtLeastOnce().Text()
+        from ws1 in Parse.Chars(" \t").Many()
+        select name;
+
     public static readonly Parser<RestComment> CommentParser =
         from ws1 in Parse.WhiteSpace.Many()
         from start in Parse.String("#").Or(Parse.String("//")).Text()
+        from prompt in PromptParser.Optional()
         from text in Parse.CharExcept("\r\n").Many().Text()
         from _ in Parse.LineTerminator
         select new RestComment
         {
             Start = start,
-            Text = text
+            Text = text,
+            Prompt = prompt.GetOrDefault()
         };
 
     public static readonly Parser<RestVariable> VariableParser =

@@ -97,11 +97,11 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             int iComment;
             if (int.TryParse(Tag, out var lineNumber))
             {
-                iComment = list.FindLastIndex(x => x is RestComment c && c.Start == "#" && c.Text.StartsWith("##") && c.Pos?.Line <= lineNumber);
+                iComment = list.FindLastIndex(x => x is RestComment c && c.IsSeparator && c.Pos?.Line <= lineNumber);
             }
             else
             {
-                iComment = list.FindLastIndex(x => x is RestComment c && c.Start == "#" && c.Text.StartsWith("##") && c.Text[2..].Trim() == Tag);
+                iComment = list.FindLastIndex(x => x is RestComment c && c.IsSeparator && c.Text[2..].Trim() == Tag);
             }
 
             // take the first request after ###
@@ -115,6 +115,27 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             }
         }
         return source.OfType<RestRequest>().FirstOrDefault();
+    }
+
+    List<RestComment> GetPrompts(List<AnySyntax> source, RestRequest request)
+    {
+        var r = new List<RestComment>();
+
+        int index = source.IndexOf(request);
+        for (int i = index; --i >= 0;)
+        {
+            if (source[i] is RestComment comment)
+            {
+                if (comment.IsSeparator)
+                    break;
+
+                if (comment.Prompt is { })
+                    r.Add(comment);
+            }
+        }
+
+        r.Reverse();
+        return r;
     }
 
     protected override void BeginProcessing()
@@ -141,20 +162,34 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             throw new FormatException($"Parsing '{Path}: {parsed.Message}");
 
         // select tagged request
-        var request = FindRequest(parsed.Value) ??
-                throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
+        var syntaxes = parsed.Value.ToList();
+        var request = FindRequest(syntaxes) ??
+            throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
 
-        // get variables first, new override old, then expand
+        // variables and prompts
         _variables = [];
         {
+            // get raw vars, new replace old
             foreach (var it in parsed.Value)
             {
                 if (it is RestVariable var)
                     _variables[var.Name] = var.Value;
             }
 
+            // then expand, vars may use other vars
             foreach (var kv in _variables)
                 _variables[kv.Key] = _environment.ExpandVariables(kv.Value, _variables);
+
+            // then get prompt vars, replace old
+            var comments = GetPrompts(syntaxes, request);
+            foreach (var comment in comments)
+            {
+                var name = comment.Prompt!;
+                var prompt = comment.Text.Length > 0 ? comment.Text : name;
+                var maskInput = "|password|Password|PASSWORD|passwd|Passwd|PASSWD|pass|Pass|PASS|".Contains($"|{name}|");
+                var res = ScriptBlock.Create("Read-Host -Prompt $args[0] -MaskInput:$args[1]").Invoke(prompt, maskInput);
+                _variables[name] = res.Count > 0 ? res[0].ToString() : string.Empty;
+            }
         }
 
         // body
