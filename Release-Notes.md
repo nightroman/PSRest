@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.5.5
+
+Support request variables `{{requestName.(response|request).(body|headers).(*|Header Name)}}`.
+
 ## v0.5.4
 
 Support prompt variables.

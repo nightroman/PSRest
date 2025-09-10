@@ -4,6 +4,7 @@ public record RestComment : AnySyntax
 {
     public required string Start { get; init; }
     public required string Text { get; init; }
+    public string? Named { get; init; }
     public string? Prompt { get; init; }
     public bool IsSeparator => Start == "#" && Text.StartsWith("##");
 }

@@ -39,6 +39,12 @@ Prompt (input)
 - `# @prompt var [prompt]`
 - `// @prompt var [prompt]`
 
+Request
+
+- `# @name requestName`
+- `// @name requestName`
+- `{{requestName.(response|request).(body|headers).(*|Header Name)}}`
+
 ## Roadmap
 
 - [x] Environments and file, environment, system variables

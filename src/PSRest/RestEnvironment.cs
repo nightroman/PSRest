@@ -1,5 +1,6 @@
 ﻿using DotNetEnv;
 using DotNetEnv.Extensions;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace PSRest;
@@ -11,6 +12,8 @@ public class RestEnvironment
     readonly string? _DotEnvFile;
     readonly string? _SettingsFile;
 
+    static readonly Dictionary<string, NamedData> s_namedData = [];
+
     Dictionary<string, string>? _dataEnvCurrent;
     Dictionary<string, string>? _dataEnvShared;
     Dictionary<string, string>? _dataDotEnv;
@@ -20,6 +23,12 @@ public class RestEnvironment
         string? Name = null,
         string? DotEnvFile = null,
         string? SettingsFile = null);
+
+    public record NamedData(
+        string RequestBody,
+        List<RestHeader> RequestHeaders,
+        string ResponseBody,
+        HttpContentHeaders ResponseHeaders);
 
     public RestEnvironment(Args args)
     {
@@ -31,6 +40,24 @@ public class RestEnvironment
         _Path = args.Path;
         _DotEnvFile = args.DotEnvFile;
         _SettingsFile = args.SettingsFile;
+    }
+
+    public static void SetNamedData(string name, NamedData data)
+    {
+        s_namedData[name] = data;
+    }
+
+    public string ExpandVariables(string value, Dictionary<string, string>? vars = null)
+    {
+        var mm = Regexes.RestVariable().Matches(value);
+        for (int i = mm.Count; --i >= 0;)
+        {
+            var m = mm[i];
+            var var = GetVariable(m.Groups[1].Value, VariableType.Any, vars);
+            if (var is { })
+                value = value[0..m.Index] + var + value[(m.Index + m.Length)..];
+        }
+        return value;
     }
 
     public string? GetVariable(string name, VariableType type, Dictionary<string, string>? vars = null)
@@ -60,6 +87,10 @@ public class RestEnvironment
                     throw new ArgumentException($"Unknown variable '{name}'.");
 
                 name = parts[1];
+            }
+            else if (name.Contains('.'))
+            {
+                return GetRequestVariable(name);
             }
             else
             {
@@ -218,16 +249,53 @@ public class RestEnvironment
         return null;
     }
 
-    public string ExpandVariables(string value, Dictionary<string, string>? vars = null)
+    static string? GetRequestVariable(string name)
     {
-        var mm = Regexes.RestVariable().Matches(value);
-        for (int i = mm.Count; --i >= 0;)
+        var parts = name.Split('.', 4);
+        if (parts.Length < 4)
+            throw new FormatException($"Invalid or not supported request variable: '{name}'.");
+
+        if (!s_namedData.TryGetValue(parts[0], out var data))
+            throw new InvalidOperationException($"Request named '{parts[0]}' should be invoked first.");
+
+        switch (parts[1])
         {
-            var m = mm[i];
-            var var = GetVariable(m.Groups[1].Value, VariableType.Any, vars);
-            if (var is { })
-                value = value[0..m.Index] + var + value[(m.Index + m.Length)..];
+            case "request":
+                switch (parts[2])
+                {
+                    case "body":
+                        return EvalBodyPath(data.RequestBody, parts[3]);
+
+                    case "headers":
+                        var key = parts[3];
+                        var values = data.RequestHeaders
+                            .Where(x => x.Key.Equals(key, StringComparison.OrdinalIgnoreCase))
+                            .Select(x => x.Value);
+                        return string.Join(",", values);
+                }
+                break;
+
+            case "response":
+                switch (parts[2])
+                {
+                    case "body":
+                        return EvalBodyPath(data.ResponseBody, parts[3]);
+
+                    case "headers":
+                        var key = parts[3];
+                        return data.ResponseHeaders.TryGetValues(key, out var values) ? string.Join(",", values) : string.Empty;
+                }
+                break;
         }
-        return value;
+
+        return null;
+    }
+
+    static string EvalBodyPath(string body, string path)
+    {
+        if (path == "*")
+            return body;
+
+        throw new NotSupportedException($"This request variable path is not supported: '{path}'.");
     }
 }

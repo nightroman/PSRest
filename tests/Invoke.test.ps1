@@ -115,6 +115,23 @@ task Basic-Prompt {
 	equals $log.MaskInput $true
 }
 
+task Basic-Request {
+	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request.http")
+
+	# first, producer request
+	$null = Invoke-RestHttp -Text $text
+
+	# then, consumer request
+	($r = Invoke-RestHttp -Text $text -Tag Consumer)
+	$r = ConvertFrom-Json $r -AsHashtable
+
+	equals $r.Data.requestHeader "42"
+	equals $r.Data.responseHeader "application/json"
+	equals $r.Data.requestBody.user "Joe"
+	equals $r.Data.responseBody.Headers.Age "42" #? capitalized `Age`
+	equals $r.Data.responseBody.Data.user "Joe"
+}
+
 task Continents-1 {
 	Set-RestEnvironment '' http
 	($r = Invoke-RestHttp http/Continents-1.http)

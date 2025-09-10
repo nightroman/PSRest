@@ -117,9 +117,10 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return source.OfType<RestRequest>().FirstOrDefault();
     }
 
-    List<RestComment> GetPrompts(List<AnySyntax> source, RestRequest request)
+    static List<RestComment> GetPromptsAndNamed(List<AnySyntax> source, RestRequest request, out string? named)
     {
         var r = new List<RestComment>();
+        named = null;
 
         int index = source.IndexOf(request);
         for (int i = index; --i >= 0;)
@@ -130,7 +131,13 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
                     break;
 
                 if (comment.Prompt is { })
+                {
                     r.Add(comment);
+                }
+                else if (comment.Named is { } str && named is null)
+                {
+                    named = str;
+                }
             }
         }
 
@@ -167,6 +174,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
 
         // variables and prompts
+        string? named = null;
         _variables = [];
         {
             // get raw vars, new replace old
@@ -181,7 +189,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
                 _variables[kv.Key] = _environment.ExpandVariables(kv.Value, _variables);
 
             // then get prompt vars, replace old
-            var comments = GetPrompts(syntaxes, request);
+            var comments = GetPromptsAndNamed(syntaxes, request, out named);
             foreach (var comment in comments)
             {
                 var name = comment.Prompt!;
@@ -283,5 +291,10 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         }
 
         WriteObject(contentString);
+
+        if (named is { })
+        {
+            RestEnvironment.SetNamedData(named, new(expBody ?? string.Empty, request.Headers, contentString, response.Content.Headers));
+        }
     }
 }
