@@ -5,7 +5,7 @@
 @var1 = 11
 @var1 = 42
 
-POST http://127.0.0.1:55001/show?param1={{var2}}
+POST http://[::1]:55001/show?param1={{var2}}
 Content-Type: application/json
 age: {{var2}}
 

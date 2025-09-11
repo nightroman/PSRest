@@ -1,6 +1,6 @@
 # Invoke-RestHttp // GraphQL with selected operation name
 
-POST http://127.0.0.1:55001/show
+POST http://[::1]:55001/show
 Content-Type: application/json
 X-Request-Type: GraphQL
 X-GraphQL-Operation: Continents2

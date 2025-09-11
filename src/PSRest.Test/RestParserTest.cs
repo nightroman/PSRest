@@ -48,7 +48,7 @@ public class RestParserTest
         # Invoke-RestHttp should work
         //@param1 = 42 // file variables are not yet supported
 
-        POST http://127.0.0.1:55000/show?param1=42
+        POST http://[::1]:55000/show?param1=42
         content-type: application/json
 
         {
@@ -58,15 +58,15 @@ public class RestParserTest
         """;
 
     const string Http3 = """
-        GET http://127.0.0.1:55001/test/1
+        GET http://[::1]:55001/test/1
 
         ###
         # @prompt bar1
-        GET http://127.0.0.1:55001/test/2/{{bar1}}
+        GET http://[::1]:55001/test/2/{{bar1}}
 
         ### bar
         // @prompt bar2 some stuff
-        GET http://127.0.0.1:55001/test/3/{{bar2}
+        GET http://[::1]:55001/test/3/{{bar2}
         """;
 
     [Theory]
