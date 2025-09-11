@@ -12,12 +12,12 @@ public sealed class ResolveVariableCommand : BaseEnvironmentCmdlet
 
     RestEnvironment _environment = null!;
 
-    protected override void BeginProcessing()
+    protected override void MyBeginProcessing()
     {
         _environment = GetCurrentEnvironment();
     }
 
-    protected override void ProcessRecord()
+    protected override void MyProcessRecord()
     {
         if (Value is { })
         {

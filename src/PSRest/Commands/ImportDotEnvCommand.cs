@@ -7,7 +7,7 @@ namespace PSRest.Commands;
 [Cmdlet("Import", "RestDotEnv", DefaultParameterSetName = PsnMain)]
 [OutputType(typeof(Dictionary<string, string>))]
 [OutputType(typeof(KeyValuePair<string, string>))]
-public sealed class ImportDotEnvCommand : PSCmdlet
+public sealed class ImportDotEnvCommand : AnyCmdlet
 {
     const string PsnMain = "Main";
     const string PsnAsDictionary = "AsDictionary";
@@ -23,7 +23,7 @@ public sealed class ImportDotEnvCommand : PSCmdlet
     public SwitchParameter AsKeyValue { get; set; }
 
     //! `Env.Load` does not fail on missing files, so we test `Path` if set.
-    protected override void BeginProcessing()
+    protected override void MyBeginProcessing()
     {
         // options
         bool opSetEnvVars = !AsDictionary && !AsKeyValue;

@@ -2,6 +2,5 @@
 {
   "version": "{{version}}",
   "user": "{{$dotenv user}}",
-  "oops": "{{missing}}",
   "age": {{age}}
 }

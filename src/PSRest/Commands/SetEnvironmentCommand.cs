@@ -3,7 +3,7 @@
 namespace PSRest.Commands;
 
 [Cmdlet("Set", "RestEnvironment")]
-public sealed class SetEnvironmentCommand : PSCmdlet
+public sealed class SetEnvironmentCommand : AnyCmdlet
 {
     [Parameter(Position = 0)]
     public string? Name { get; set; }
@@ -17,7 +17,7 @@ public sealed class SetEnvironmentCommand : PSCmdlet
     [Parameter]
     public string? SettingsFile { get; set; }
 
-    protected override void BeginProcessing()
+    protected override void MyBeginProcessing()
     {
         var dir = Path is null ? SessionState.Path.CurrentFileSystemLocation.ProviderPath : GetUnresolvedProviderPathFromPSPath(Path);
         var env = new RestEnvironment(new(dir)

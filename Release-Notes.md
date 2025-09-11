@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.6.0
+
+Fail on undefined variables, unlike REST Client, see README.
+
 ## v0.5.5
 
 Support request variables `{{requestName.(response|request).(body|headers).(*|Header Name)}}`.

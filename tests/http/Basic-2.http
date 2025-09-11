@@ -12,7 +12,6 @@ age: {{var2}}
 {
   "version": "{{  version  }}",
   "user": "{{  $dotenv user  }}",
-  "empty": "{{  }}",
   "randomInt": "{{  $randomInt 0 2  }}",
   "timestamp1": "{{  $timestamp  }}",
   "timestamp2": "{{  $timestamp 1 s  }}",
@@ -21,7 +20,6 @@ age: {{var2}}
   "datetimeIso3": "{{  $localDatetime iso8601  }}",
   "datetimeRfc1": "{{  $datetime rfc1123  }}",
   "datetimeRfc2": "{{  $datetime rfc1123 1 s }}",
-  "oops": "{{missing}}",
   "age": {{var2}}
 }
 

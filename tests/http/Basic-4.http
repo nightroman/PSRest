@@ -9,6 +9,5 @@ age: {{age}}
 <request>
 <version>{{version}}</version>
 <user>{{$dotenv user}}</user>
-<oops>{{missing}}</oops>
 <age>{{age}}</age>
 </request>

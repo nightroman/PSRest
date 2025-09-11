@@ -4,7 +4,7 @@ namespace PSRest;
 
 partial class Regexes
 {
-    [GeneratedRegex("""{{(.+?)}}""")]
+    [GeneratedRegex("""{{(.*?)}}""")]
     public static partial Regex RestVariable();
 
     [GeneratedRegex("""\n\s*\r?\n""")]

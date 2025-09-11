@@ -2,7 +2,7 @@
 
 namespace PSRest.Commands;
 
-public abstract class BaseEnvironmentCmdlet : PSCmdlet
+public abstract class BaseEnvironmentCmdlet : AnyCmdlet
 {
     RestEnvironment? _Environment;
 

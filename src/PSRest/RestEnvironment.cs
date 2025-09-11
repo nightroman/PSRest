@@ -7,16 +7,16 @@ namespace PSRest;
 
 public class RestEnvironment
 {
-    readonly string _Name;
-    readonly string _Path;
-    readonly string? _DotEnvFile;
-    readonly string? _SettingsFile;
+    private readonly string _Name;
+    private readonly string _Path;
+    private readonly string? _DotEnvFile;
+    private readonly string? _SettingsFile;
 
-    static readonly Dictionary<string, NamedData> s_namedData = [];
+    private static readonly Dictionary<string, NamedData> s_namedData = [];
 
-    Dictionary<string, string>? _dataEnvCurrent;
-    Dictionary<string, string>? _dataEnvShared;
-    Dictionary<string, string>? _dataDotEnv;
+    private Dictionary<string, string>? _dataEnvCurrent;
+    private Dictionary<string, string>? _dataEnvShared;
+    private Dictionary<string, string>? _dataDotEnv;
 
     public record Args(
         string Path,
@@ -54,16 +54,15 @@ public class RestEnvironment
         {
             var m = mm[i];
             var var = GetVariable(m.Groups[1].Value, VariableType.Any, vars);
-            if (var is { })
-                value = value[0..m.Index] + var + value[(m.Index + m.Length)..];
+            value = value[0..m.Index] + var + value[(m.Index + m.Length)..];
         }
         return value;
     }
 
-    public string? GetVariable(string name, VariableType type, Dictionary<string, string>? vars = null)
+    public string GetVariable(string name, VariableType type, Dictionary<string, string>? vars = null)
     {
         if ((name = name.Trim()).Length == 0)
-            return "{{}}";
+            throw new InvalidOperationException("Not supported empty variable '{{}}'.");
 
         if (type == VariableType.Any)
         {
@@ -115,7 +114,7 @@ public class RestEnvironment
         };
     }
 
-    public static string? GetSystemVariable(string name)
+    private static string? GetSystemVariable(string name)
     {
         if (name == Const.SystemGuid)
         {
@@ -155,12 +154,13 @@ public class RestEnvironment
         return null;
     }
 
-    public static string? GetProcessEnvVariable(string name)
+    private static string GetProcessEnvVariable(string name)
     {
-        return Environment.GetEnvironmentVariable(name);
+        //! as REST Client
+        return Environment.GetEnvironmentVariable(name) ?? string.Empty;
     }
 
-    public string? GetDotEnvVariable(string name)
+    private string GetDotEnvVariable(string name)
     {
         if (_dataDotEnv is null)
         {
@@ -178,10 +178,10 @@ public class RestEnvironment
         if (_dataDotEnv.TryGetValue(name, out var value))
             return value;
 
-        return null;
+        throw new InvalidOperationException($".env variable '{name}' is undefined.");
     }
 
-    static string? GetSettingsPath(string dir)
+    private static string? GetSettingsPath(string dir)
     {
         for (; ; )
         {
@@ -195,7 +195,7 @@ public class RestEnvironment
         }
     }
 
-    void InitEnv()
+    private void InitEnv()
     {
         var path = _SettingsFile ?? GetSettingsPath(_Path) ??
             throw new InvalidOperationException("Cannot find '.vscode/settings.json'.");
@@ -232,7 +232,7 @@ public class RestEnvironment
         }
     }
 
-    public string? GetEnvVariable(string name, bool shared = false, Dictionary<string, string>? vars = null)
+    private string GetEnvVariable(string name, bool shared = false, Dictionary<string, string>? vars = null)
     {
         if (!shared && vars is { } && vars.TryGetValue(name, out var value))
             return value;
@@ -246,14 +246,16 @@ public class RestEnvironment
         if (_dataEnvShared!.TryGetValue(name, out value))
             return value;
 
-        return null;
+        throw new InvalidOperationException($"Variable '{name}' is undefined.");
     }
 
-    static string? GetRequestVariable(string name)
+    private static string GetRequestVariable(string name)
     {
+        InvalidOperationException NotSupported() => new($"Not supported request variable: '{name}'.");
+
         var parts = name.Split('.', 4);
         if (parts.Length < 4)
-            throw new FormatException($"Invalid or not supported request variable: '{name}'.");
+            throw NotSupported();
 
         if (!s_namedData.TryGetValue(parts[0], out var data))
             throw new InvalidOperationException($"Request named '{parts[0]}' should be invoked first.");
@@ -288,10 +290,10 @@ public class RestEnvironment
                 break;
         }
 
-        return null;
+        throw NotSupported();
     }
 
-    static string EvalBodyPath(string body, string path)
+    private static string EvalBodyPath(string body, string path)
     {
         if (path == "*")
             return body;

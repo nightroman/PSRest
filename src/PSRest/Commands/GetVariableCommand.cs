@@ -12,7 +12,7 @@ public sealed class GetVariableCommand : BaseEnvironmentCmdlet
     [Parameter]
     public VariableType Type { get; set; }
 
-    protected override void BeginProcessing()
+    protected override void MyBeginProcessing()
     {
         WriteObject(GetCurrentEnvironment().GetVariable(Name, Type));
     }

@@ -145,7 +145,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return r;
     }
 
-    protected override void BeginProcessing()
+    protected override void MyBeginProcessing()
     {
         string text;
         switch (ParameterSetName)

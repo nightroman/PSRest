@@ -35,7 +35,6 @@ task Basic-2 {
 	$d = $r.Data
 	equals $d.version "v1"
 	equals $d.user "admin"
-	equals $d.oops "{{missing}}"
 	equals $d.age 42L
 }
 
@@ -54,7 +53,6 @@ task Basic-3 {
 	$d = $r.Data
 	equals $d.version "v1"
 	equals $d.user "admin"
-	equals $d.oops "{{missing}}"
 	equals $d.age 42L
 }
 

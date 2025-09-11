@@ -58,6 +58,20 @@ Request
     - [x] Support prompt variables
     - [ ] Support request variables
 
+## Differences with REST Client
+
+The main difference: PSRest is CLI, REST Client is GUI. PSRest is designed for
+interactive and non-interactive use. The latter requires to be strict is some
+cases.
+
+PSRest fails on undefined variables instead of leaving them unresolved like
+`{{something}}`. Unresolved variables cause cryptic invalid input errors or
+later issues difficult to troubleshoot.
+
+GraphQL operations support headers `X-GraphQL-Operation: operationName` in
+order to specify the exact operation in multi-operation GraphQL. Compare:
+REST Client always invokes the first operation.
+
 ## See also
 
 - [PSRest Release Notes](https://github.com/nightroman/PSRest/blob/main/Release-Notes.md)

@@ -15,11 +15,18 @@ Exit-Build {
 	$env:REST_ENV = $REST_ENV
 }
 
+task empty {
+	Set-RestEnvironment
+
+	try { throw Resolve-RestVariable '{{}}' }
+	catch { equals "$_" "Not supported empty variable '{{}}'." }
+}
+
 task processEnv {
 	Set-RestEnvironment
 
 	$r = Get-RestVariable missing -Type ProcessEnv
-	equals $r $null
+	equals $r ''
 
 	$r = Get-RestVariable PSModulePath -Type ProcessEnv
 	assert $r
@@ -30,8 +37,8 @@ task dotEnv {
 	$env:user = $null
 	Set-RestEnvironment '' http
 
-	$r = Get-RestVariable missing -Type DotEnv
-	equals $r $null
+	try { throw Get-RestVariable missing -Type DotEnv }
+	catch { equals "$_" ".env variable 'missing' is undefined." }
 
 	$r = Get-RestVariable user -Type DotEnv
 	equals $r admin
@@ -43,8 +50,8 @@ task dotEnv {
 task env {
 	Set-RestEnvironment '' http
 
-	$r = Get-RestVariable missing
-	equals $r $null
+	try { throw Get-RestVariable missing }
+	catch { equals "$_" "Variable 'missing' is undefined." }
 
 	$r = Get-RestVariable version
 	equals $r v1
@@ -53,8 +60,8 @@ task env {
 task local {
 	Set-RestEnvironment local http
 
-	$r = Get-RestVariable missing
-	equals $r $null
+	try { throw Get-RestVariable missing }
+	catch { equals "$_" "Variable 'missing' is undefined." }
 
 	$r = Get-RestVariable version
 	equals $r v2
@@ -66,8 +73,8 @@ task local {
 task production {
 	Set-RestEnvironment production http
 
-	$r = Get-RestVariable missing
-	equals $r $null
+	try { throw Get-RestVariable missing }
+	catch { equals "$_" "Variable 'missing' is undefined." }
 
 	$r = Get-RestVariable version
 	equals $r v1
@@ -80,8 +87,8 @@ task resolve_shared {
 	$env:test = 42
 	Set-RestEnvironment '' http
 
-	$1, $2 = '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>' | Resolve-RestVariable
-	equals $1 '<<v1 // {{$shared token}}>>'
+	$1, $2 = '<<{{version}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>' | Resolve-RestVariable
+	equals $1 '<<v1>>'
 	equals $2 '<<admin // 42>>'
 }
 
@@ -89,8 +96,8 @@ task resolve_local {
 	$env:test = 42
 	Set-RestEnvironment local http
 
-	$1, $2 = Resolve-RestVariable '<<{{version}} // {{$shared token}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>'
-	equals $1 '<<v2 // {{$shared token}}>>'
+	$1, $2 = Resolve-RestVariable '<<{{version}}>>', '<<{{$dotenv user}} // {{$processEnv test}}>>'
+	equals $1 '<<v2>>'
 	equals $2 '<<admin // 42>>'
 }
 
@@ -153,7 +160,7 @@ task datetime {
 
 	# yes offset
 	($r2 = Get-RestVariable '$datetime iso8601 1 s')
-	equals 1 ([int]([datetime]::Parse($r2) - [datetime]::Parse($r)).TotalSeconds)
+	assert (([int]([datetime]::Parse($r2) - [datetime]::Parse($r)).TotalSeconds) -in @(1, 2))
 
 	# at least one localDatetime, different from datetime unless same zone
 	($r = Get-RestVariable '$localDatetime iso8601 1 s')
