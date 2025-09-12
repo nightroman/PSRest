@@ -2,6 +2,7 @@
 using DotNetEnv.Extensions;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Xml;
 
 namespace PSRest;
 
@@ -258,7 +259,7 @@ public class RestEnvironment
             throw NotSupported();
 
         if (!s_namedData.TryGetValue(parts[0], out var data))
-            throw new InvalidOperationException($"Request named '{parts[0]}' should be invoked first.");
+            throw new InvalidOperationException($"Invoke required request named '{parts[0]}'.");
 
         switch (parts[1])
         {
@@ -266,7 +267,15 @@ public class RestEnvironment
                 switch (parts[2])
                 {
                     case "body":
-                        return EvalBodyPath(data.RequestBody, parts[3]);
+                        if (parts[3] == "*")
+                            return data.RequestBody;
+
+                        if (data.RequestHeaders.Any(x =>
+                            x.Key.Equals(Const.MediaContentType, StringComparison.OrdinalIgnoreCase) &&
+                            x.Value.Contains("/xml")))
+                            return EvalBodyXPath(data.RequestBody, parts[3]);
+
+			            throw NotSupported();
 
                     case "headers":
                         var key = parts[3];
@@ -281,7 +290,13 @@ public class RestEnvironment
                 switch (parts[2])
                 {
                     case "body":
-                        return EvalBodyPath(data.ResponseBody, parts[3]);
+                        if (parts[3] == "*")
+                            return data.ResponseBody;
+
+                        if (data.ResponseHeaders.ContentType?.MediaType?.Contains("/xml") == true)
+                            return EvalBodyXPath(data.RequestBody, parts[3]);
+
+			            throw NotSupported();
 
                     case "headers":
                         var key = parts[3];
@@ -293,11 +308,18 @@ public class RestEnvironment
         throw NotSupported();
     }
 
-    private static string EvalBodyPath(string body, string path)
+    private static string EvalBodyXPath(string body, string path)
     {
-        if (path == "*")
-            return body;
+        var xmlDoc = new XmlDocument();
+        xmlDoc.LoadXml(body);
 
-        throw new NotSupportedException($"This request variable path is not supported: '{path}'.");
+        var node = xmlDoc.SelectSingleNode(path);
+        if (node is null)
+            return string.Empty; //! unlike REST Client variable name
+
+        if (node.HasChildNodes)
+            return node.InnerXml;
+
+        return node.InnerText;
     }
 }

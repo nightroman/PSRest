@@ -43,7 +43,7 @@ Request
 
 - `# @name requestName`
 - `// @name requestName`
-- `{{requestName.(response|request).(body|headers).(*|Header Name)}}`
+- `{{requestName.(response|request).(body|headers).(*|XPath|Header Name)}}`
 
 ## Roadmap
 
@@ -61,16 +61,19 @@ Request
 ## Differences with REST Client
 
 The main difference: PSRest is CLI, REST Client is GUI. PSRest is designed for
-interactive and non-interactive use. The latter requires to be strict is some
-cases.
+interactive and non-interactive calls. The latter implies some stricter rules.
 
-PSRest fails on undefined variables instead of leaving them unresolved like
-`{{something}}`. Unresolved variables cause cryptic invalid input errors or
-later issues difficult to troubleshoot.
+PSRest fails on undefined variables instead of leaving them unresolved by
+REST Client like `{{var}}`. Unresolved variables may cause cryptic invalid
+input errors or later processing issues and some troubleshooting.
 
-GraphQL operations support headers `X-GraphQL-Operation: operationName` in
-order to specify the exact operation in multi-operation GraphQL. Compare:
-REST Client always invokes the first operation.
+PSRest GraphQL operations support header `X-GraphQL-Operation: operationName`
+for the exact operation in multi-operation GraphQL. REST Client invokes the
+first operation.
+
+Request variables XPath:
+- Missing path: PSRest gets empty string, REST Client gets unresolved variable.
+- Element with children inner XML: PSRest trims, REST Client gets as is.
 
 ## See also
 

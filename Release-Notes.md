@@ -1,5 +1,12 @@
 # PSRest Release Notes
 
+## v0.6.1
+
+Support request variable XPath if media type contains `/xml`.
+
+Fail if the request tag is not found.\
+Fail on invalid response JSON or XML.
+
 ## v0.6.0
 
 Fail on undefined variables, unlike REST Client, see README.

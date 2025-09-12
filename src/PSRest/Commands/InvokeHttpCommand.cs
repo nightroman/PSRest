@@ -102,16 +102,15 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             else
             {
                 iComment = list.FindLastIndex(x => x is RestComment c && c.IsSeparator && c.Text[2..].Trim() == Tag);
+                if (iComment < 0)
+                    throw new InvalidOperationException($"Cannot find request tag '{Tag}'.");
             }
 
-            // take the first request after ###
-            if (iComment >= 0)
+            // take the first request after ### or -1
+            for (int i = iComment + 1; i < list.Count; i++)
             {
-                for (int i = iComment + 1; i < list.Count; i++)
-                {
-                    if (list[i] is RestRequest r)
-                        return r;
-                }
+                if (list[i] is RestRequest r)
+                    return r;
             }
         }
         return source.OfType<RestRequest>().FirstOrDefault();
@@ -267,7 +266,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             throw new InvalidOperationException(contentString);
 
         // JSON, format
-        if (response.Content.Headers.ContentType?.MediaType?.Contains("json", StringComparison.OrdinalIgnoreCase) == true)
+        if (response.Content.Headers.ContentType?.MediaType?.Contains("/json", StringComparison.OrdinalIgnoreCase) == true)
         {
             try
             {
@@ -275,10 +274,10 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             }
             catch (Exception ex)
             {
-                WriteWarning($"Formatting JSON: {ex.Message}");
+                throw new InvalidOperationException($"Formatting JSON: {ex.Message}");
             }
         }
-        else if (response.Content.Headers.ContentType?.MediaType?.Contains(Const.MediaTypeXml, StringComparison.OrdinalIgnoreCase) == true)
+        else if (response.Content.Headers.ContentType?.MediaType?.Contains("/xml", StringComparison.OrdinalIgnoreCase) == true)
         {
             try
             {
@@ -286,7 +285,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             }
             catch (Exception ex)
             {
-                WriteWarning($"Formatting XML: {ex.Message}");
+                throw new InvalidOperationException($"Formatting XML: {ex.Message}");
             }
         }
 

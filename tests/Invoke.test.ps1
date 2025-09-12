@@ -113,8 +113,13 @@ task Basic-Prompt {
 	equals $log.MaskInput $true
 }
 
-task Basic-Request {
-	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request.http")
+# Synopsis: Test missing tag and named JSON.
+task Basic-Request-Json {
+	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Json.http")
+
+	# missing
+	try { throw Invoke-RestHttp -Text $text -Tag missing }
+	catch { equals "$_" "Cannot find request tag 'missing'." }
 
 	# first, producer request
 	$null = Invoke-RestHttp -Text $text
@@ -126,8 +131,32 @@ task Basic-Request {
 	equals $r.Data.requestHeader "42"
 	equals $r.Data.responseHeader "application/json"
 	equals $r.Data.requestBody.user "Joe"
-	equals $r.Data.responseBody.Headers.Age "42" #? capitalized `Age`
+	#? capitalized `Age`
+	equals $r.Data.responseBody.Headers.Age "42"
 	equals $r.Data.responseBody.Data.user "Joe"
+}
+
+# Synopsis: Test just named XML, Basic-Request-Json tests missing tag.
+task Basic-Request-Xml {
+	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Xml.http")
+
+	# first, producer request
+	$null = Invoke-RestHttp -Text $text
+
+	# then, consumer request
+	($r = Invoke-RestHttp -Text $text -Tag Consumer)
+	$r = [xml]$r
+
+	equals $r.root2.requestHeader "42"
+	equals $r.root2.responseHeader "application/xml"
+	equals $r.root2.requestBody.InnerXml '<root1><version>v1</version><user><name>Joe</name></user></root1>'
+	equals $r.root2.responseBody.InnerXml '<root1><version>v1</version><user><name>Joe</name></user></root1>'
+	equals $r.root2.requestBody0 ''
+	equals $r.root2.responseBody0 ''
+	equals $r.root2.requestBody1 v1
+	equals $r.root2.responseBody1 v1
+	equals $r.root2.requestBody2.InnerXml '<name>Joe</name>'
+	equals $r.root2.responseBody2.InnerXml '<name>Joe</name>'
 }
 
 task Continents-1 {

@@ -1,0 +1,24 @@
+﻿# Invoke-RestHttp // HTTP // request variables
+
+### Producer
+
+# @name ProducerJson
+POST http://[::1]:55001/show
+Content-Type: application/json
+age: 42
+
+{
+  "user": "Joe"
+}
+
+### Consumer
+
+POST http://[::1]:55001/show
+Content-Type: application/json
+
+{
+  "requestHeader": "{{ProducerJson.request.headers.age}}",
+  "responseHeader": "{{ProducerJson.response.headers.Content-Type}}",
+  "requestBody": {{ProducerJson.request.body.*}},
+  "responseBody": {{ProducerJson.response.body.*}}
+}

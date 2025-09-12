@@ -1,0 +1,33 @@
+﻿# Invoke-RestHttp // HTTP // request variables
+
+### Producer
+
+# @name ProducerXml
+POST http://[::1]:55001/show/xml
+Content-Type: application/xml
+age: 42
+
+<root1>
+  <version>v1</version>
+  <user>
+    <name>Joe</name>
+  </user>
+</root1>
+
+### Consumer
+
+POST http://[::1]:55001/show/xml
+Content-Type: application/xml
+
+<root2>
+  <requestHeader>{{ProducerXml.request.headers.age}}</requestHeader>
+  <responseHeader>{{ProducerXml.response.headers.Content-Type}}</responseHeader>
+  <requestBody>{{ProducerXml.request.body.*}}</requestBody>
+  <responseBody>{{ProducerXml.response.body.*}}</responseBody>
+  <requestBody0>{{ProducerXml.request.body.missing}}</requestBody0>
+  <responseBody0>{{ProducerXml.response.body.missing}}</responseBody0>
+  <requestBody1>{{ProducerXml.request.body.root1/version}}</requestBody1>
+  <responseBody1>{{ProducerXml.response.body.root1/version}}</responseBody1>
+  <requestBody2>{{ProducerXml.request.body.root1/user}}</requestBody2>
+  <responseBody2>{{ProducerXml.response.body.root1/user}}</responseBody2>
+</root2>

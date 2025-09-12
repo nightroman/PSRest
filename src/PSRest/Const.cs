@@ -17,6 +17,7 @@ static class Const
     public const string EnvVarDefault = "REST_ENV";
     public const string EnvVarTag = "REST_TAG";
 
+    public const string MediaContentType = "Content-Type";
     public const string MediaTypeJson = "application/json";
     public const string MediaTypeXml = "application/xml";
 
