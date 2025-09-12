@@ -113,13 +113,25 @@ task Basic-Prompt {
 	equals $log.MaskInput $true
 }
 
-# Synopsis: Test missing tag and named JSON.
-task Basic-Request-Json {
+# Synopsis: Test missing tag.
+task Basic-Request-Json-KO {
 	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Json.http")
 
-	# missing
 	try { throw Invoke-RestHttp -Text $text -Tag missing }
 	catch { equals "$_" "Cannot find request tag 'missing'." }
+}
+
+# Synopsis: Test missing tag.
+task Basic-Request-Xml-KO {
+	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Xml.http")
+
+	try { throw Invoke-RestHttp -Text $text -Tag missing }
+	catch { equals "$_" "Cannot find request tag 'missing'." }
+}
+
+# Synopsis: Test named JSON.
+task Basic-Request-Json-OK {
+	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Json.http")
 
 	# first, producer request
 	$null = Invoke-RestHttp -Text $text
@@ -130,14 +142,20 @@ task Basic-Request-Json {
 
 	equals $r.Data.requestHeader "42"
 	equals $r.Data.responseHeader "application/json"
-	equals $r.Data.requestBody.user "Joe"
-	#? capitalized `Age`
-	equals $r.Data.responseBody.Headers.Age "42"
-	equals $r.Data.responseBody.Data.user "Joe"
+	equals $r.Data.requestBody.version 21L
+	equals $r.Data.requestBody.user.name "Joe"
+	equals $r.Data.responseBody.Data.version 21L
+	equals $r.Data.responseBody.Data.user.name "Joe"
+	equals $r.Data.requestBody0 ''
+	equals $r.Data.responseBody0 ''
+	equals $r.Data.requestBody1 '21'
+	equals $r.Data.responseBody1 '21'
+	equals $r.Data.requestBody2.name 'Joe'
+	equals $r.Data.responseBody2.name 'Joe'
 }
 
-# Synopsis: Test just named XML, Basic-Request-Json tests missing tag.
-task Basic-Request-Xml {
+# Synopsis: Test named XML.
+task Basic-Request-Xml-OK {
 	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Xml.http")
 
 	# first, producer request

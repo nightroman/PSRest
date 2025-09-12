@@ -1,7 +1,9 @@
 ﻿using DotNetEnv;
 using DotNetEnv.Extensions;
+using Json.Path;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Xml;
 
 namespace PSRest;
@@ -272,10 +274,15 @@ public class RestEnvironment
 
                         if (data.RequestHeaders.Any(x =>
                             x.Key.Equals(Const.MediaContentType, StringComparison.OrdinalIgnoreCase) &&
+                            x.Value.Contains("/json")))
+                            return EvalBodyJsonPath(data.RequestBody, parts[3]);
+
+                        if (data.RequestHeaders.Any(x =>
+                            x.Key.Equals(Const.MediaContentType, StringComparison.OrdinalIgnoreCase) &&
                             x.Value.Contains("/xml")))
                             return EvalBodyXPath(data.RequestBody, parts[3]);
 
-			            throw NotSupported();
+                        throw NotSupported();
 
                     case "headers":
                         var key = parts[3];
@@ -293,10 +300,13 @@ public class RestEnvironment
                         if (parts[3] == "*")
                             return data.ResponseBody;
 
-                        if (data.ResponseHeaders.ContentType?.MediaType?.Contains("/xml") == true)
-                            return EvalBodyXPath(data.RequestBody, parts[3]);
+                        if (data.ResponseHeaders.ContentType?.MediaType?.Contains("/json") == true)
+                            return EvalBodyJsonPath(data.ResponseBody, parts[3]);
 
-			            throw NotSupported();
+                        if (data.ResponseHeaders.ContentType?.MediaType?.Contains("/xml") == true)
+                            return EvalBodyXPath(data.ResponseBody, parts[3]);
+
+                        throw NotSupported();
 
                     case "headers":
                         var key = parts[3];
@@ -321,5 +331,29 @@ public class RestEnvironment
             return node.InnerXml;
 
         return node.InnerText;
+    }
+
+    private static string EvalBodyJsonPath(string body, string path)
+    {
+        var select = JsonPath.Parse(path);
+        if (select.Segments.Length == 0)
+            throw new InvalidOperationException($"JSON path should have selectors: '{path}'.");
+
+        var options = new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
+        JsonNode? root = JsonNode.Parse(body, null, options);
+
+		//! select and cache, avoid 2+ execution
+		var nodes = select.Evaluate(root).Matches.ToList();
+        if (nodes.Count == 0)
+            return string.Empty;
+
+        if (nodes.Count >= 2)
+            throw new InvalidOperationException($"JSON path should be single node: '{path}'.");
+
+        var node = nodes[0];
+        if (node.Value is null)
+            return string.Empty;
+
+        return node.Value.ToJsonString();
     }
 }

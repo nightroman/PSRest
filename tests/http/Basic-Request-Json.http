@@ -8,7 +8,10 @@ Content-Type: application/json
 age: 42
 
 {
-  "user": "Joe"
+  "version": 21,
+  "user": {
+    "name": "Joe"
+  }
 }
 
 ### Consumer
@@ -20,5 +23,11 @@ Content-Type: application/json
   "requestHeader": "{{ProducerJson.request.headers.age}}",
   "responseHeader": "{{ProducerJson.response.headers.Content-Type}}",
   "requestBody": {{ProducerJson.request.body.*}},
-  "responseBody": {{ProducerJson.response.body.*}}
+  "responseBody": {{ProducerJson.response.body.*}},
+  "requestBody0": "{{ProducerJson.request.body.$.missing}}",
+  "responseBody0": "{{ProducerJson.response.body.$.missing}}",
+  "requestBody1": "{{ProducerJson.request.body.$.version}}",
+  "responseBody1": "{{ProducerJson.response.body.$.Data.version}}",
+  "requestBody2": {{ProducerJson.request.body.$.user}},
+  "responseBody2": {{ProducerJson.response.body.$.Data.user}},
 }

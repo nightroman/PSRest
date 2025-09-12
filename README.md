@@ -43,7 +43,7 @@ Request
 
 - `# @name requestName`
 - `// @name requestName`
-- `{{requestName.(response|request).(body|headers).(*|XPath|Header Name)}}`
+- `{{requestName.(response|request).(body|headers).(*|JSONPath|XPath|Header Name)}}`
 
 ## Roadmap
 
@@ -70,6 +70,9 @@ input errors or later processing issues and some troubleshooting.
 PSRest GraphQL operations support header `X-GraphQL-Operation: operationName`
 for the exact operation in multi-operation GraphQL. REST Client invokes the
 first operation.
+
+Request variables JSONPath:
+- Missing path: PSRest gets empty string, REST Client gets unresolved variable.
 
 Request variables XPath:
 - Missing path: PSRest gets empty string, REST Client gets unresolved variable.

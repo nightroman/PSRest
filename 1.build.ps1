@@ -102,6 +102,8 @@ task package help, markdown, version, {
 	Assert-SameFile.ps1 -Result (Get-ChildItem z\$ModuleName -Recurse -File -Name) -Text -View $env:MERGE @'
 about_PSRest.help.txt
 DotNetEnv.dll
+Json.More.dll
+JsonPath.Net.dll
 LICENSE
 Microsoft.Extensions.Configuration.Abstractions.dll
 Microsoft.Extensions.Configuration.dll

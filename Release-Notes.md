@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.6.2
+
+Support request variable JSONPath if media type contains `/json`.
+
 ## v0.6.1
 
 Support request variable XPath if media type contains `/xml`.
