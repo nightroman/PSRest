@@ -131,13 +131,8 @@ task Basic-Request-Xml-KO {
 
 # Synopsis: Test named JSON.
 task Basic-Request-Json-OK {
-	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Json.http")
-
-	# first, producer request
-	$null = Invoke-RestHttp -Text $text
-
-	# then, consumer request
-	($r = Invoke-RestHttp -Text $text -Tag Consumer)
+	# consumer request, producer is called automatically
+	($r = Invoke-RestHttp http/Basic-Request-Json.http -Tag Consumer)
 	$r = ConvertFrom-Json $r -AsHashtable
 
 	equals $r.Data.requestHeader "42"
@@ -156,13 +151,8 @@ task Basic-Request-Json-OK {
 
 # Synopsis: Test named XML.
 task Basic-Request-Xml-OK {
-	$text = [System.IO.File]::ReadAllText("$PSScriptRoot/http/Basic-Request-Xml.http")
-
-	# first, producer request
-	$null = Invoke-RestHttp -Text $text
-
-	# then, consumer request
-	($r = Invoke-RestHttp -Text $text -Tag Consumer)
+	# consumer request, producer is called automatically
+	($r = Invoke-RestHttp http/Basic-Request-Xml.http -Tag Consumer)
 	$r = [xml]$r
 
 	equals $r.root2.requestHeader "42"

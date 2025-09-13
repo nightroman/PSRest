@@ -12,8 +12,8 @@ namespace PSRest.Commands;
 [OutputType(typeof(string))]
 public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
 {
-    const string PsnMain = "Main";
-    const string PsnText = "Text";
+    private const string PsnMain = "Main";
+    private const string PsnText = "Text";
 
     [Parameter(Position = 0, Mandatory = true, ParameterSetName = PsnMain)]
     public string? Path { get; set; }
@@ -27,13 +27,16 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
     [Parameter]
     public string? Tag { get; set; } = System.Environment.GetEnvironmentVariable(Const.EnvVarTag);
 
-    static readonly JsonSerializerOptions s_JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true };
+    private static readonly JsonSerializerOptions s_JsonSerializerOptions =
+        new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true };
 
-    string _location = null!;
-    RestEnvironment _environment = null!;
-    Dictionary<string, string> _variables = null!;
+    // nested shared data
+    private Stack<string> _calls = null!;
+    private string _location = null!;
+    private RestEnvironment _environment = null!;
+    private List<AnySyntax> _syntaxes = null!;
 
-    string BodyToContent(string body)
+    private string BodyToContent(string body, VariableArgs args)
     {
         //! mind xml
         if (!body.StartsWith("< ") && !body.StartsWith("<@ "))
@@ -43,15 +46,15 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         var path = IOPath.Combine(_location, body[(expand ? 3 : 2)..].Trim());
 
         body = File.ReadAllText(path).Trim();
-        return expand ? _environment.ExpandVariables(body, _variables) : body;
+        return expand ? _environment.ExpandVariables(body, args) : body;
     }
 
-    string BodyToGraphQL(string body, string? expOperationName)
+    private string BodyToGraphQL(string body, string? expOperationName, VariableArgs args)
     {
         string[] parts = Regexes.EmptyLine().Split(body, 2);
 
         // query
-        var query = BodyToContent(parts[0]);
+        var query = BodyToContent(parts[0], args);
         var dto = new Dictionary<string, object?>(3) { { "query", query } };
 
         // variables
@@ -65,7 +68,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return JsonSerializer.Serialize(dto);
     }
 
-    static string FormatXml(string xml)
+    private static string FormatXml(string xml)
     {
         var doc = new XmlDocument();
         doc.LoadXml(xml);
@@ -86,7 +89,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return sw.ToString();
     }
 
-    RestRequest? FindRequest(IEnumerable<AnySyntax> source)
+    private RestRequest? FindTaggedRequest(IEnumerable<AnySyntax> source)
     {
         if (!string.IsNullOrEmpty(Tag))
         {
@@ -116,10 +119,33 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return source.OfType<RestRequest>().FirstOrDefault();
     }
 
-    static List<RestComment> GetPromptsAndNamed(List<AnySyntax> source, RestRequest request, out string? named)
+    private RestRequest FindNamedRequest(IEnumerable<AnySyntax> source, string name)
+    {
+        //! assume list
+        var list = (List<AnySyntax>)source;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i] is not RestComment comment || comment.IsSeparator || comment.Named is { } named && named != name)
+                continue;
+
+            while (++i < list.Count)
+            {
+                if (list[i] is RestRequest request)
+                    return request;
+
+                if (list[i] is RestComment comment2 && (comment2.IsSeparator || comment2.Named is { } named2 && named2 != name))
+                    break;
+            }
+        }
+
+        throw new InvalidOperationException($"Named request '{name}' is not found.");
+    }
+
+    private static List<RestComment> GetPromptsAndNamed(List<AnySyntax> source, RestRequest request, string? named1, out string? named2)
     {
         var r = new List<RestComment>();
-        named = null;
+        named2 = named1;
 
         int index = source.IndexOf(request);
         for (int i = index; --i >= 0;)
@@ -133,9 +159,9 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
                 {
                     r.Add(comment);
                 }
-                else if (comment.Named is { } str && named is null)
+                else if (named1 is null && comment.Named is { } str && named2 is null)
                 {
-                    named = str;
+                    named2 = str;
                 }
             }
         }
@@ -144,63 +170,96 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return r;
     }
 
+    private void InvokeNamedRequest(string name)
+    {
+        if (_calls.Contains(name))
+            throw new InvalidOperationException($"Cyclic reference of named request '{name}'.");
+
+        try
+        {
+            _calls.Push(name);
+            MyBeginProcessing();
+        }
+        finally
+        {
+            _calls.Pop();
+        }
+    }
+
     protected override void MyBeginProcessing()
     {
-        string text;
-        switch (ParameterSetName)
+        // root call? init shared data for nested calls
+        if (_calls is null)
         {
-            case PsnMain:
-                Path = GetUnresolvedProviderPathFromPSPath(Path);
-                _location = IOPath.GetDirectoryName(Path)!;
-                text = File.ReadAllText(Path);
-                break;
-            case PsnText:
-                _location = SessionState.Path.CurrentFileSystemLocation.ProviderPath;
-                text = Text!;
-                break;
-            default:
-                throw new NotImplementedException();
+            _calls = new();
+
+            // location, text, environment
+            string text;
+            switch (ParameterSetName)
+            {
+                case PsnMain:
+                    Path = GetUnresolvedProviderPathFromPSPath(Path);
+                    _location = IOPath.GetDirectoryName(Path)!;
+                    text = File.ReadAllText(Path);
+                    break;
+                case PsnText:
+                    _location = SessionState.Path.CurrentFileSystemLocation.ProviderPath;
+                    text = Text!;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            _environment = GetOrCreateEnvironment(_location);
+
+            // parsed syntaxes
+            var parsed = RestParser.Parser.TryParse(text);
+            if (!parsed.WasSuccessful)
+                throw new InvalidOperationException($"Parsing HTTP: {parsed.Message}");
+            _syntaxes = [.. parsed.Value];
         }
-        _environment = GetOrCreateEnvironment(_location);
 
-        var parsed = RestParser.Parser.TryParse(text);
-        if (!parsed.WasSuccessful)
-            throw new FormatException($"Parsing '{Path}: {parsed.Message}");
-
-        // select tagged request
-        var syntaxes = parsed.Value.ToList();
-        var request = FindRequest(syntaxes) ??
-            throw new FormatException($"Parsing '{Path}: HTTP request is not found.");
+        // select tagged or named request
+        RestRequest request;
+        string? named = null;
+        if (_calls.Count == 0)
+        {
+            request = FindTaggedRequest(_syntaxes) ??
+                throw new InvalidOperationException("HTTP request is not found.");
+        }
+        else
+        {
+            named = _calls.Peek();
+            request = FindNamedRequest(_syntaxes, named);
+        }
 
         // variables and prompts
-        string? named = null;
-        _variables = [];
+        var args = new VariableArgs { HttpFile = Path, Vars = [], InvokeNamedRequest = InvokeNamedRequest }!;
         {
             // get raw vars, new replace old
-            foreach (var it in parsed.Value)
+            foreach (var it in _syntaxes)
             {
                 if (it is RestVariable var)
-                    _variables[var.Name] = var.Value;
+                    args.Vars[var.Name] = var.Value;
             }
 
             // then expand, vars may use other vars
-            foreach (var kv in _variables)
-                _variables[kv.Key] = _environment.ExpandVariables(kv.Value, _variables);
+            foreach (var kv in args.Vars)
+                args.Vars[kv.Key] = _environment.ExpandVariables(kv.Value, args);
 
             // then get prompt vars, replace old
-            var comments = GetPromptsAndNamed(syntaxes, request, out named);
+            var comments = GetPromptsAndNamed(_syntaxes, request, named, out named);
             foreach (var comment in comments)
             {
                 var name = comment.Prompt!;
                 var prompt = comment.Text.Length > 0 ? comment.Text : name;
                 var maskInput = "|password|Password|PASSWORD|passwd|Passwd|PASSWD|pass|Pass|PASS|".Contains($"|{name}|");
                 var res = ScriptBlock.Create("Read-Host -Prompt $args[0] -MaskInput:$args[1]").Invoke(prompt, maskInput);
-                _variables[name] = res.Count > 0 ? res[0].ToString() : string.Empty;
+                args.Vars[name] = res.Count > 0 ? res[0].ToString() : string.Empty;
             }
         }
 
         // body
-        var expBody = request.Body is null ? null : _environment.ExpandVariables(request.Body, _variables);
+        var expBody = request.Body is null ? null : _environment.ExpandVariables(request.Body, args);
 
         // GraphQL or content body
         if (request.Headers.Find(x
@@ -211,28 +270,28 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             request.Headers.Remove(headerRequestType);
 
             if (request.Operation.Method != "POST")
-                throw new FormatException($"Expected 'POST' method for GraphQL requests, found '{request.Operation.Method}'");
+                throw new InvalidOperationException($"Expected 'POST' method for GraphQL requests, found '{request.Operation.Method}'");
 
             if (expBody is null)
-                throw new FormatException("GraphQL request should have body.");
+                throw new InvalidOperationException("GraphQL request should have source code.");
 
             string? expOperationName = null;
             if (request.Headers.Find(x
                 => x.Key.Equals(Const.XGraphQLOperation, StringComparison.OrdinalIgnoreCase)) is { } headerGraphQLOperation)
             {
                 request.Headers.Remove(headerGraphQLOperation);
-                expOperationName = _environment.ExpandVariables(headerGraphQLOperation.Value, _variables);
+                expOperationName = _environment.ExpandVariables(headerGraphQLOperation.Value, args);
             }
 
-            expBody = BodyToGraphQL(expBody, expOperationName);
+            expBody = BodyToGraphQL(expBody, expOperationName, args);
         }
         else if (expBody is { })
         {
-            expBody = BodyToContent(expBody);
+            expBody = BodyToContent(expBody, args);
         }
 
         // HTTP request message with URL
-        var expUrl = _environment.ExpandVariables(request.Operation.Url, _variables);
+        var expUrl = _environment.ExpandVariables(request.Operation.Url, args);
         var message = new HttpRequestMessage(HttpMethod.Parse(request.Operation.Method), expUrl);
 
         // HTTP version
@@ -242,7 +301,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         // HTTP headers
         foreach (var header in request.Headers)
         {
-            var expValue = _environment.ExpandVariables(header.Value, _variables);
+            var expValue = _environment.ExpandVariables(header.Value, args);
             message.Headers.TryAddWithoutValidation(header.Key, expValue);
         }
 
@@ -256,21 +315,38 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         HttpResponseMessage response = client.Send(message);
         WriteProgress(new(0, Const.MyName, "Done"));
 
-        // variables
-        if (HeadersVariable is { })
-            SessionState.PSVariable.Set(new(HeadersVariable, response.Content.Headers));
+        // out variables
+        if (_calls.Count == 0)
+        {
+            if (HeadersVariable is { })
+                SessionState.PSVariable.Set(new(HeadersVariable, response.Content.Headers));
+        }
 
-        // content
-        var contentString = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        // lazy content
+        Lazy<string> contentString = new(() => response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+
+        // set named data when file is used
+        if (named is { })
+        {
+            RestEnvironment.SetNamedData(named, Path, new(expBody ?? string.Empty, request.Headers, contentString.Value, response.Content.Headers));
+        }
+
+        // fail?
         if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException(contentString);
+            throw new InvalidOperationException(contentString.Value);
 
-        // JSON, format
+        // write content
+
+        if (_calls.Count > 0)
+            return;
+
+        string resultString;
         if (response.Content.Headers.ContentType?.MediaType?.Contains("/json", StringComparison.OrdinalIgnoreCase) == true)
         {
+            // format JSON
             try
             {
-                contentString = JsonSerializer.Serialize(JsonSerializer.Deserialize<object>(contentString), s_JsonSerializerOptions);
+                resultString = JsonSerializer.Serialize(JsonSerializer.Deserialize<object>(contentString.Value), s_JsonSerializerOptions);
             }
             catch (Exception ex)
             {
@@ -279,21 +355,21 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         }
         else if (response.Content.Headers.ContentType?.MediaType?.Contains("/xml", StringComparison.OrdinalIgnoreCase) == true)
         {
+            // format XML
             try
             {
-                contentString = FormatXml(contentString);
+                resultString = FormatXml(contentString.Value);
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Formatting XML: {ex.Message}");
             }
         }
-
-        WriteObject(contentString);
-
-        if (named is { })
+        else
         {
-            RestEnvironment.SetNamedData(named, new(expBody ?? string.Empty, request.Headers, contentString, response.Content.Headers));
+            resultString = contentString.Value;
         }
+
+        WriteObject(resultString);
     }
 }

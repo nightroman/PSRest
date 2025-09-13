@@ -20,6 +20,7 @@
 		'Get-RestVariable'
 		'Resolve-RestVariable'
 		'Import-RestDotEnv'
+		'Reset-Rest'
 	)
 
 	PrivateData = @{

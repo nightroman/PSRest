@@ -15,7 +15,7 @@ public class RestEnvironment
     private readonly string? _DotEnvFile;
     private readonly string? _SettingsFile;
 
-    private static readonly Dictionary<string, NamedData> s_namedData = [];
+    private static readonly Dictionary<(string, string?), NamedData> s_namedData = [];
 
     private Dictionary<string, string>? _dataEnvCurrent;
     private Dictionary<string, string>? _dataEnvShared;
@@ -45,24 +45,29 @@ public class RestEnvironment
         _SettingsFile = args.SettingsFile;
     }
 
-    public static void SetNamedData(string name, NamedData data)
+    public static void SetNamedData(string name, string? file, NamedData data)
     {
-        s_namedData[name] = data;
+        s_namedData[(name, file)] = data;
     }
 
-    public string ExpandVariables(string value, Dictionary<string, string>? vars = null)
+    public static void Reset()
+    {
+        s_namedData.Clear();
+    }
+
+    public string ExpandVariables(string value, VariableArgs? args = null)
     {
         var mm = Regexes.RestVariable().Matches(value);
         for (int i = mm.Count; --i >= 0;)
         {
             var m = mm[i];
-            var var = GetVariable(m.Groups[1].Value, VariableType.Any, vars);
+            var var = GetVariable(m.Groups[1].Value, VariableType.Any, args);
             value = value[0..m.Index] + var + value[(m.Index + m.Length)..];
         }
         return value;
     }
 
-    public string GetVariable(string name, VariableType type, Dictionary<string, string>? vars = null)
+    public string GetVariable(string name, VariableType type, VariableArgs? args = null)
     {
         if ((name = name.Trim()).Length == 0)
             throw new InvalidOperationException("Not supported empty variable '{{}}'.");
@@ -92,7 +97,7 @@ public class RestEnvironment
             }
             else if (name.Contains('.'))
             {
-                return GetRequestVariable(name);
+                return GetRequestVariable(name, args);
             }
             else
             {
@@ -109,7 +114,7 @@ public class RestEnvironment
 
         return type switch
         {
-            VariableType.Env => GetEnvVariable(name, false, vars),
+            VariableType.Env => GetEnvVariable(name, false, args),
             VariableType.Shared => GetEnvVariable(name, true),
             VariableType.DotEnv => GetDotEnvVariable(name),
             VariableType.ProcessEnv => GetProcessEnvVariable(name),
@@ -235,9 +240,9 @@ public class RestEnvironment
         }
     }
 
-    private string GetEnvVariable(string name, bool shared = false, Dictionary<string, string>? vars = null)
+    private string GetEnvVariable(string name, bool shared = false, VariableArgs? args = null)
     {
-        if (!shared && vars is { } && vars.TryGetValue(name, out var value))
+        if (!shared && args?.Vars is { } vars && vars.TryGetValue(name, out var value))
             return value;
 
         if (_dataEnvShared is null)
@@ -252,7 +257,7 @@ public class RestEnvironment
         throw new InvalidOperationException($"Variable '{name}' is undefined.");
     }
 
-    private static string GetRequestVariable(string name)
+    private static string GetRequestVariable(string name, VariableArgs? args)
     {
         InvalidOperationException NotSupported() => new($"Not supported request variable: '{name}'.");
 
@@ -260,8 +265,14 @@ public class RestEnvironment
         if (parts.Length < 4)
             throw NotSupported();
 
-        if (!s_namedData.TryGetValue(parts[0], out var data))
-            throw new InvalidOperationException($"Invoke required request named '{parts[0]}'.");
+        var dataKey = (parts[0], args?.HttpFile);
+        if (!s_namedData.TryGetValue(dataKey, out var data))
+        {
+            args?.InvokeNamedRequest?.Invoke(parts[0]);
+
+            if (!s_namedData.TryGetValue(dataKey, out data))
+                throw new InvalidOperationException($"Invoke required named request '{parts[0]}'.");
+        }
 
         switch (parts[1])
         {
@@ -342,8 +353,8 @@ public class RestEnvironment
         var options = new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
         JsonNode? root = JsonNode.Parse(body, null, options);
 
-		//! select and cache, avoid 2+ execution
-		var nodes = select.Evaluate(root).Matches.ToList();
+        //! select and cache, avoid 2+ execution
+        var nodes = select.Evaluate(root).Matches.ToList();
         if (nodes.Count == 0)
             return string.Empty;
 

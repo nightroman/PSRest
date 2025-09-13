@@ -41,7 +41,7 @@ task content -After publish {
 }
 
 task uninstall {
-	Get-ChildItem $ModuleRoot\.. -Filter $ModuleName | Remove-Item -Force -Recurse -Confirm
+	Get-ChildItem $ModuleRoot\.. -Filter $ModuleName | Remove-Item -Force -Recurse
 }
 
 task version {

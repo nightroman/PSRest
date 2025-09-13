@@ -1,5 +1,13 @@
 # PSRest Release Notes
 
+## v0.7.0
+
+New cmdlet `Reset-Rest`.
+
+Automatic calls of referenced named requests.
+
+Replace "Roadmap" section with "Features" in README.
+
 ## v0.6.2
 
 Support request variable JSONPath if media type contains `/json`.

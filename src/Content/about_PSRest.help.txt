@@ -12,6 +12,7 @@ LONG DESCRIPTION
         Get-RestVariable
         Resolve-RestVariable
         Import-RestDotEnv
+        Reset-Rest
 
 SEE ALSO
     PSRest https://github.com/nightroman/PSRest
