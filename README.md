@@ -80,6 +80,7 @@ PSRest automatically calls required named requests, REST Client does not.
 
 ## See also
 
+- [PSRest Documentation](https://github.com/nightroman/PSRest/blob/main/docs/README.md)
 - [PSRest Release Notes](https://github.com/nightroman/PSRest/blob/main/Release-Notes.md)
 - [VSCode REST Client]
 
