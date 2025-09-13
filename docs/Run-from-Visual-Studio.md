@@ -1,5 +1,9 @@
 # Run from Visual Studio
 
+> Two ways to invoke the current caret request.
+
+Open an HTTP file in the editor and invoke it as external tool or Package Manager console command.
+
 ## External tool
 
 - Menu `Tools / External Tools...`
