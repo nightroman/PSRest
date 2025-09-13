@@ -1,5 +1,11 @@
 # PSRest Release Notes
 
+## v0.7.1
+
+Do not show progress by `Invoke-RestHttp`, it's not ideal in VSCode host.
+
+Add `/docs` folder and pages about using in VCode and Visual Studio.
+
 ## v0.7.0
 
 New cmdlet `Reset-Rest`.

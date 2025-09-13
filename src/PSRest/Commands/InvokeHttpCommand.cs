@@ -1,4 +1,5 @@
-﻿using Sprache;
+﻿using Json.Path;
+using Sprache;
 using System.Management.Automation;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -310,10 +311,8 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
             message.Content = new StringContent(expBody, Encoding.UTF8, Const.MediaTypeJson);
 
         // HTTP client, send
-        WriteProgress(new(1, Const.MyName, "Sending HTTP request..."));
         var client = new HttpClient();
         HttpResponseMessage response = client.Send(message);
-        WriteProgress(new(0, Const.MyName, "Done"));
 
         // out variables
         if (_calls.Count == 0)
