@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.7.3
+
+Tweak help and /docs.
+
 ## v0.7.2
 
 Use `http-client.env.json` first (Visual Studio), then `.vscode/settings.json` (VSCode).

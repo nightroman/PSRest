@@ -28,5 +28,4 @@ pwsh -c Invoke-RestHttp $dte.ActiveDocument.FullName -Tag $dte.ActiveDocument.Se
 
 ## See also
 
-- [README](README.md)
 - [Run-from-VSCode](Run-from-VSCode.md)

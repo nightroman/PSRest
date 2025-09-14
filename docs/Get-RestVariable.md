@@ -1,16 +1,20 @@
 # Get-RestVariable
+
 ## Name
 ```
 Get-RestVariable : Gets the specified variable.
 ```
+
 ## Syntax
 ```
 [-Name] String [-Environment RestEnvironment] [-Type VariableType]
 ```
+
 ## Description
 ```
 Gets the specified variable value or null if the variable is not found.
 ```
+
 ## Parameters
 ```
 -Name
@@ -37,4 +41,10 @@ Gets the specified variable value or null if the variable is not found.
     
     Required?                    false
     Position?                    named
+```
+
+## Outputs
+```
+String
+    Variable value.
 ```

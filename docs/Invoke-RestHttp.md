@@ -1,14 +1,17 @@
 # Invoke-RestHttp
+
 ## Name
 ```
 Invoke-RestHttp : Invokes VSCode REST Client files (.http, .rest).
 ```
+
 ## Syntax
 ```
 [-Path] String [-Environment RestEnvironment] [-HeadersVariable String] [-Tag String]
 
 -Text String [-Environment RestEnvironment] [-HeadersVariable String] [-Tag String]
 ```
+
 ## Description
 ```
 Parses and invokes an HTTP request from VSCode REST Client file (.http,
@@ -19,6 +22,7 @@ Unlike other cmdlets, Invoke-RestHttp does not require Set-RestEnvironment.
 If $RestEnvironment is not found, Invoke-RestHttp assumes default Name and
 Path, either the input file directory or current location with Text.
 ```
+
 ## Parameters
 ```
 -Path
@@ -58,4 +62,10 @@ Path, either the input file directory or current location with Text.
     
     Required?                    true
     Position?                    named
+```
+
+## Outputs
+```
+String
+    JSON, XML, HTML, text, etc.
 ```

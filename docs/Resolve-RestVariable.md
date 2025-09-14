@@ -1,17 +1,21 @@
 # Resolve-RestVariable
+
 ## Name
 ```
 Resolve-RestVariable : Expands variables in input strings.
 ```
+
 ## Syntax
 ```
 [-Value] String[] [-Environment RestEnvironment]
 ```
+
 ## Description
 ```
 Replaces each variable embedded in the specified string with its value,
 then returns the result string.
 ```
+
 ## Parameters
 ```
 -Value
@@ -28,4 +32,16 @@ then returns the result string.
     
     Required?                    false
     Position?                    named
+```
+
+## Inputs
+```
+String
+    String with variables to expand.
+```
+
+## Outputs
+```
+String
+    String with expanded variables.
 ```

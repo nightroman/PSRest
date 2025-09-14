@@ -20,6 +20,5 @@ Example: [.env](../tests/http/.env)
 
 ## See also
 
-- [README](README.md)
 - [VSCode REST Client](https://github.com/Huachao/vscode-restclient)
 - [Use .http files in Visual Studio](https://learn.microsoft.com/en-us/aspnet/core/test/http-files)

@@ -42,6 +42,12 @@ $Environment = @'
 		- or specify any line number between separator comments
 '@
 	}
+	outputs = @(
+		@{
+			type = 'String'
+			description = 'JSON, XML, HTML, text, etc.'
+		}
+	)
 }
 
 ### Set-RestEnvironment
@@ -96,7 +102,7 @@ $Environment = @'
 	}
 }
 
-### Resolve-RestVariable
+### Get-RestVariable
 @{
 	command = 'Get-RestVariable'
 	synopsis = 'Gets the specified variable.'
@@ -115,6 +121,12 @@ $Environment = @'
 '@
 		Environment = $Environment
 	}
+	outputs = @(
+		@{
+			type = 'String'
+			description = 'Variable value.'
+		}
+	)
 }
 
 ### Resolve-RestVariable
@@ -132,6 +144,18 @@ $Environment = @'
 '@
 		Environment = $Environment
 	}
+	inputs = @(
+		@{
+			type = 'String'
+			description = 'String with variables to expand.'
+		}
+	)
+	outputs = @(
+		@{
+			type = 'String'
+			description = 'String with expanded variables.'
+		}
+	)
 }
 
 ### Import-RestDotEnv
@@ -162,11 +186,11 @@ $Environment = @'
 	}
 	outputs = @(
 		@{
-			type = 'System.Collections.Generic.Dictionary[System.String, System.String]'
+			type = 'Dictionary[String, String]'
 			description = 'when -AsDictionary'
 		}
 		@{
-			type = 'System.Collections.Generic.KeyValuePair[System.String, System.String]'
+			type = 'KeyValuePair[String, String]'
 			description = 'when -AsKeyValue'
 		}
 	)

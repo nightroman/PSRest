@@ -39,5 +39,4 @@ To make this easier, add some key to VSCode `keybindings.json`:
 
 ## See also
 
-- [README](README.md)
 - [Run-from-Visual-Studio](Run-from-Visual-Studio.md)

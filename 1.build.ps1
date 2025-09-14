@@ -118,9 +118,18 @@ Sprache.dll
 }
 
 task pushPSGallery package, {
+	assert ('main' -ceq (exec { git branch --show-current })) 'Checkout main.'
+	assert (!(exec { git status --short })) 'Commit changes.'
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
 }, clean
+
+task docs {
+	foreach($c in Get-Command -Module PSRest) {
+		print 3 $c.Name
+		Convert-HelpToMarkdown.ps1 $c.Name "docs/$($c.Name).md"
+	}
+}
 
 task unit {
 	Set-Location src\PSRest.Test
@@ -134,15 +143,3 @@ task test {
 }
 
 task . build, help, clean
-
-task docs {
-	foreach($c in Get-Command -Module PSRest) {
-		$name = $c.Name
-		print 3 $name
-		$text = $(
-			"# $name`n"
-			Convert-HelpToMarkdown.ps1 $name
-		)
-		Set-Content "docs/$name.md" $text -NoNewline
-	}
-}

@@ -1,22 +1,26 @@
 # Import-RestDotEnv
+
 ## Name
 ```
 Import-RestDotEnv : Imports variables from ".env".
 ```
+
 ## Syntax
 ```
 [[-Path] String]
 
-[[-Path] String] -AsDictionary 
+[[-Path] String] -AsDictionary
 
-[[-Path] String] -AsKeyValue 
+[[-Path] String] -AsKeyValue
 ```
+
 ## Description
 ```
 It imports variables from the specified or default ".env" file and applies
 them to the current process environment, unless As* is used. In that case
 the process environment is not changed and variables are returned.
 ```
+
 ## Parameters
 ```
 -Path
@@ -42,4 +46,13 @@ the process environment is not changed and variables are returned.
     
     Required?                    true
     Position?                    named
+```
+
+## Outputs
+```
+Dictionary[String, String]
+    when -AsDictionary
+
+KeyValuePair[String, String]
+    when -AsKeyValue
 ```
