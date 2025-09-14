@@ -1,21 +1,21 @@
 # Run from Visual Studio
 
-> Two ways to invoke the current caret request.
+> Two ways to invoke the current request from the editor
 
 Open an HTTP file in the editor and invoke it as external tool or Package Manager console command.
 
 ## External tool
 
-- Menu `Tools / External Tools...`
+- Menu `Tools / External Tools`
 - Click `Add`
-- Fill the form
+- Set:
 
 | Field             | Text                                               | Notes                          |
 | ----------------- | -------------------------------------------------- | ------------------------------ |
 | Title             | `Invoke-RestHttp`                                  | you may assign a hotkey by `&` |
-| Command           | `pwsh.exe`                                         | assuming in the system path    |
+| Command           | `pwsh.exe`                                         | assuming in the path           |
 | Arguments         | `-c Invoke-RestHttp "$(ItemPath)" -Tag $(CurLine)` |                                |
-| Use Output window | `ON`                                               |                                |
+| Use Output window | `Yes`                                              |                                |
 
 ## NuGet Package Manager console
 

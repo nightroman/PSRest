@@ -28,9 +28,10 @@ The default REST Client required files layout is strict: ".env" and
 ## Parameters
 ```
 -Name
-    Specifies the environment name, one of defined in ".vscode/settings.json".
+    Specifies the environment name, one of defined in
+    "http-client.env.json" or ".vscode/settings.json".
     
-    If Name is empty then not empty $env:REST_ENV is used or default '$shared'.
+    If Name is empty then not empty $env:REST_ENV is used or '$shared'.
     
     Example: '$shared' (default), 'local', 'production':
     

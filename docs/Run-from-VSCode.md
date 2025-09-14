@@ -1,4 +1,4 @@
-# Run from Visual Studio Code
+# Run from VSCode
 
 > Open an HTTP file in the editor and invoke it as described.
 
@@ -29,7 +29,7 @@ Register-EditorCommand -Name HTTP -DisplayName 'Invoke-RestHttp' -ScriptBlock {
 ```
 
 Use `PowerShell: Show Additional Commands` from the command palette.
-The registered  `HTTP` should there, select it and view terminal output.
+Select the registered command and view its terminal output.
 
 To make this easier, add some key to VSCode `keybindings.json`:
 
