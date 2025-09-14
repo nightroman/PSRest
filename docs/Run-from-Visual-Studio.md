@@ -25,3 +25,8 @@ Open an HTTP file in the editor and invoke it as external tool or Package Manage
 ```powershell
 pwsh -c Invoke-RestHttp $dte.ActiveDocument.FullName -Tag $dte.ActiveDocument.Selection.CurrentLine
 ```
+
+## See also
+
+- [README](README.md)
+- [Run-from-VSCode](Run-from-VSCode.md)

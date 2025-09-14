@@ -120,7 +120,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         return source.OfType<RestRequest>().FirstOrDefault();
     }
 
-    private RestRequest FindNamedRequest(IEnumerable<AnySyntax> source, string name)
+    private static RestRequest FindNamedRequest(IEnumerable<AnySyntax> source, string name)
     {
         //! assume list
         var list = (List<AnySyntax>)source;

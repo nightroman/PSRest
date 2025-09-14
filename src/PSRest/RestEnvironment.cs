@@ -189,11 +189,15 @@ public class RestEnvironment
         throw new InvalidOperationException($".env variable '{name}' is undefined.");
     }
 
-    private static string? GetSettingsPath(string dir)
+    private static string? FindSettingsPath(string dir)
     {
         for (; ; )
         {
-            var path = Path.Join(dir, Const.VSCodeDir, Const.SettingsFile);
+            var path = Path.Join(dir, Const.SettingsFile1);
+            if (File.Exists(path))
+                return path;
+
+            path = Path.Join(dir, Const.SettingsFile2);
             if (File.Exists(path))
                 return path;
 
@@ -205,7 +209,7 @@ public class RestEnvironment
 
     private void InitEnv()
     {
-        var path = _SettingsFile ?? GetSettingsPath(_Path) ??
+        var path = _SettingsFile ?? FindSettingsPath(_Path) ??
             throw new InvalidOperationException("Cannot find '.vscode/settings.json'.");
 
         try
@@ -214,8 +218,9 @@ public class RestEnvironment
             using var stream = File.OpenRead(path);
             using var doc = JsonDocument.Parse(stream, options);
 
-            if (!doc.RootElement.TryGetProperty(Const.SettingsKeyRoot, out var root))
-                throw new InvalidOperationException($"Cannot find '{Const.SettingsKeyRoot}'.");
+            // try VSCode root, else use document root
+            if (!doc.RootElement.TryGetProperty(Const.SettingsRoot, out var root))
+                root = doc.RootElement;
 
             _dataEnvShared = [];
             if (root.TryGetProperty(Const.EnvNameShared, out var shared))

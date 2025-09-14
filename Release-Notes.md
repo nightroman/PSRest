@@ -1,5 +1,11 @@
 # PSRest Release Notes
 
+## v0.7.2
+
+Use `http-client.env.json` first (Visual Studio), then `.vscode/settings.json` (VSCode).
+
+Add `docs/Environments.md`.
+
 ## v0.7.1
 
 Do not show progress by `Invoke-RestHttp`, it's not ideal in VSCode host.

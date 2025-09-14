@@ -36,3 +36,8 @@ To make this easier, add some key to VSCode `keybindings.json`:
 ```json
 { "key": "ctrl+k i", "command": "PowerShell.ShowAdditionalCommands" },
 ```
+
+## See also
+
+- [README](README.md)
+- [Run-from-Visual-Studio](Run-from-Visual-Studio.md)
