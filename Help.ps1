@@ -59,7 +59,7 @@ $Environment = @'
 
 	Parameters DotEnvFile and SettingsFile give more control on settings.
 	The default REST Client required files layout is strict: ".env" and
-	".vscode/settings.json".
+	"http-client.env.json" or ".vscode/settings.json".
 '@
 	parameters = @{
 		Name = @'

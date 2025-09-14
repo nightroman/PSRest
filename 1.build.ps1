@@ -134,3 +134,15 @@ task test {
 }
 
 task . build, help, clean
+
+task docs {
+	foreach($c in Get-Command -Module PSRest) {
+		$name = $c.Name
+		print 3 $name
+		$text = $(
+			"# $name`n"
+			Convert-HelpToMarkdown.ps1 $name
+		)
+		Set-Content "docs/$name.md" $text -NoNewline
+	}
+}
