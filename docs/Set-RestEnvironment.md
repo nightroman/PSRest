@@ -1,16 +1,17 @@
 # Set-RestEnvironment
 
-## Name
 ```
-Set-RestEnvironment : Sets the current environment.
+Sets the current environment.
 ```
 
 ## Syntax
+
 ```
-[[-Name] String] [[-Path] String] [-DotEnvFile String] [-SettingsFile String]
+Set-RestEnvironment [[-Name] String] [[-Path] String] [-DotEnvFile String] [-SettingsFile String]
 ```
 
 ## Description
+
 ```
 Sets the current environment as $RestEnvironment in the current scope.
 This variable is used by other commands as the parameter Environment
@@ -26,6 +27,7 @@ The default REST Client required files layout is strict: ".env" and
 ```
 
 ## Parameters
+
 ```
 -Name
     Specifies the environment name, one of defined in
@@ -51,20 +53,26 @@ The default REST Client required files layout is strict: ".env" and
     
     Required?                    false
     Position?                    0
+```
 
+```
 -Path
     Specifies the directory used for files discovery.
     Default: The current location.
     
     Required?                    false
     Position?                    1
+```
 
+```
 -DotEnvFile
     Specifies ".env" file explicitly.
     
     Required?                    false
     Position?                    named
+```
 
+```
 -SettingsFile
     Specifies ".vscode/settings.json" file explicitly.
     

@@ -127,7 +127,7 @@ task pushPSGallery package, {
 task docs {
 	foreach($c in Get-Command -Module PSRest) {
 		print 3 $c.Name
-		Convert-HelpToMarkdown.ps1 $c.Name "docs/$($c.Name).md"
+		Convert-HelpToDocs.ps1 $c.Name "docs/$($c.Name).md"
 	}
 }
 
