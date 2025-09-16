@@ -7,7 +7,7 @@ namespace PSRest.Commands;
 [Cmdlet("Import", "RestDotEnv", DefaultParameterSetName = PsnMain)]
 [OutputType(typeof(Dictionary<string, string>))]
 [OutputType(typeof(KeyValuePair<string, string>))]
-public sealed class ImportDotEnvCommand : AnyCmdlet
+public sealed class ImportDotEnvCommand : AbstractCmdlet
 {
     const string PsnMain = "Main";
     const string PsnAsDictionary = "AsDictionary";

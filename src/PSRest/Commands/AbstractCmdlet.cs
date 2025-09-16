@@ -2,11 +2,11 @@
 
 namespace PSRest.Commands;
 
-public class AnyCmdlet : PSCmdlet
+public class AbstractCmdlet : PSCmdlet
 {
-    protected ErrorRecord CreateErrorRecord(Exception ex)
+    protected ErrorRecord CreateErrorRecord(Exception ex, object? targetObject = null)
     {
-        return new(ex, MyInvocation.MyCommand.Name, ErrorCategory.InvalidOperation, null);
+        return new(ex, MyInvocation.MyCommand.Name, ErrorCategory.InvalidOperation, targetObject);
     }
 
     protected virtual void MyBeginProcessing() { }

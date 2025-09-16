@@ -3,7 +3,7 @@
 namespace PSRest.Commands;
 
 [Cmdlet("Set", "RestEnvironment")]
-public sealed class SetEnvironmentCommand : AnyCmdlet
+public sealed class SetEnvironmentCommand : AbstractCmdlet
 {
     [Parameter(Position = 0)]
     public string? Name { get; set; }
