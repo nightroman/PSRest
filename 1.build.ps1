@@ -28,7 +28,7 @@ task clean {
 }
 
 task build meta, {
-	exec { dotnet build src\$ModuleName -c $Configuration -f $TargetFramework }
+	exec { dotnet build src\$ModuleName -c $Configuration -f $TargetFramework --tl:off }
 }
 
 task publish {

@@ -1,5 +1,4 @@
-﻿using Json.Path;
-using Sprache;
+﻿using Sprache;
 using System.Management.Automation;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -339,8 +338,9 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
         if (_calls.Count > 0)
             return;
 
+        //! application/graphql-response+json; charset=utf-8
         string resultString;
-        if (response.Content.Headers.ContentType?.MediaType?.Contains("/json", StringComparison.OrdinalIgnoreCase) == true)
+        if (response.Content.Headers.ContentType?.MediaType?.Contains("json", StringComparison.OrdinalIgnoreCase) == true)
         {
             // format JSON
             try
@@ -352,7 +352,7 @@ public sealed class InvokeHttpCommand : BaseEnvironmentCmdlet
                 throw new InvalidOperationException($"Formatting JSON: {ex.Message}");
             }
         }
-        else if (response.Content.Headers.ContentType?.MediaType?.Contains("/xml", StringComparison.OrdinalIgnoreCase) == true)
+        else if (response.Content.Headers.ContentType?.MediaType?.Contains("xml", StringComparison.OrdinalIgnoreCase) == true)
         {
             // format XML
             try

@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.7.4
+
+Amend response content type handling.
+
 ## v0.7.3
 
 Tweak help and /docs.
