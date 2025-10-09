@@ -35,7 +35,7 @@ task import_AsDictionary_traverse {
 }
 
 task import_AsKeyValue_exact {
-	$1, $2, $3 = Import-RestDotEnv http/.env -AsKeyValue
+	$1, $2, $3, $null = Import-RestDotEnv http/.env -AsKeyValue
 
 	equals $env:user $null
 

@@ -65,6 +65,13 @@ task Basic-4 {
 	equals $r[1] '  <version>v1</version>' #! indent
 }
 
+task Basic-dotenv {
+	($r = (Invoke-RestHttp http/Basic-dotenv.http) -split '\r?\n')
+
+	equals $r[1] "  <double_quoted>'$env:USERNAME' and `"`$USERNAME`"</double_quoted>"
+	equals $r[2] '  <single_quoted>"$USERNAME"</single_quoted>'
+}
+
 task Basic-Tags {
 	$lines = [System.IO.File]::ReadAllLines("$PSScriptRoot/http/Basic-Tags.http")
 	$text = $lines -join "`n"

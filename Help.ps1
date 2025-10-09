@@ -167,6 +167,9 @@ $Environment = @'
 	It imports variables from the specified or default ".env" file and applies
 	them to the current process environment, unless As* is used. In that case
 	the process environment is not changed and variables are returned.
+
+	PSRest reads .env files using DotNetEnv. See ".env file structure":
+	https://github.com/tonerdo/dotnet-env/blob/master/README.md#env-file-structure
 '@
 	parameters = @{
 		Path = @'

@@ -1,34 +1,37 @@
 # Import-RestDotEnv
 
-```
+```text
 Imports variables from ".env".
 ```
 
 ## Syntax
 
-```
+```text
 Import-RestDotEnv [[-Path] String]
 ```
 
-```
+```text
 Import-RestDotEnv [[-Path] String] -AsDictionary
 ```
 
-```
+```text
 Import-RestDotEnv [[-Path] String] -AsKeyValue
 ```
 
 ## Description
 
-```
+```text
 It imports variables from the specified or default ".env" file and applies
 them to the current process environment, unless As* is used. In that case
 the process environment is not changed and variables are returned.
+
+PSRest reads .env files using DotNetEnv. See ".env file structure":
+https://github.com/tonerdo/dotnet-env/blob/master/README.md#env-file-structure
 ```
 
 ## Parameters
 
-```
+```text
 -Path
     Specifies the existing file to import.
     
@@ -40,7 +43,7 @@ the process environment is not changed and variables are returned.
     Position?                    0
 ```
 
-```
+```text
 -AsDictionary
     Tells to get variables as `[Dictionary[string, string]]`, case sensitive.
     Duplicates are processed as `TakeLast`.
@@ -49,7 +52,7 @@ the process environment is not changed and variables are returned.
     Position?                    named
 ```
 
-```
+```text
 -AsKeyValue
     Tells to get variables as `[KeyValuePair[string, string]]`, including
     duplicates.
@@ -60,12 +63,12 @@ the process environment is not changed and variables are returned.
 
 ## Outputs
 
-```
+```text
 Dictionary[String, String]
     when -AsDictionary
 ```
 
-```
+```text
 KeyValuePair[String, String]
     when -AsKeyValue
 ```

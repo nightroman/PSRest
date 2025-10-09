@@ -1,0 +1,9 @@
+﻿# Invoke-RestHttp // .env file structure
+
+POST http://[::1]:55001/show/xml
+Content-Type: application/xml
+
+<root>
+  <double_quoted>{{ $dotenv double_quoted }}</double_quoted>
+  <single_quoted>{{ $dotenv single_quoted }}</single_quoted>
+</root>

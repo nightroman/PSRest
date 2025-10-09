@@ -1,5 +1,9 @@
 # PSRest Release Notes
 
+## v0.7.5
+
+More docs and help about .env format.
+
 ## v0.7.4
 
 Amend response content type handling.
